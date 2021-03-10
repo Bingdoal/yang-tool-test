@@ -1,0 +1,88 @@
+module oven {
+  namespace "urn:sysrepo:oven";
+  prefix ov;
+
+  revision 2018-01-19 {
+    description
+      "Initial revision.";
+  }
+
+  typedef oven-temperature {
+    type uint8 {
+      range "0..250";
+    }
+    description
+      "Temperature range that is accepted by the oven.";
+  }
+
+  container oven {
+    description
+      "Configuration container of the oven.";
+    leaf turned-on {
+      type boolean;
+      default "false";
+      description
+        "Main switch determining whether the oven is on or off.";
+    }
+
+    leaf temperature {
+      type oven-temperature;
+      default "0";
+      description
+        "Slider for configuring the desired temperature.";
+    }
+  }
+
+  container oven-state {
+    config false;
+    description
+      "State data container of the oven.";
+    leaf temperature {
+      type oven-temperature;
+      description
+        "Actual temperature inside the oven.";
+    }
+
+    leaf food-inside {
+      type boolean;
+      description
+        "Informs whether the food is inside the oven or not.";
+    }
+  }
+
+  rpc insert-food {
+    description
+      "Operation to order the oven to put the prepared food inside.";
+    input {
+      leaf time {
+        type enumeration {
+          enum "now" {
+            description
+              "Put the food in the oven immediately.";
+          }
+          enum "on-oven-ready" {
+            description
+              "Put the food in once the temperature inside
+               the oven is at least the configured one. If it
+               is already, the behaviour is similar to 'now'.";
+          }
+        }
+        description
+          "Parameter determining when to perform the operation.";
+      }
+    }
+  }
+
+  rpc remove-food {
+    description
+      "Operation to order the oven to take the food out.";
+  }
+
+  notification oven-ready {
+    description
+      "Event of the configured temperature matching the actual
+       temperature inside the oven. If the configured temperature
+       is lower than the actual one, no notification is generated
+       when the oven cools down to the configured temperature.";
+  }
+}
