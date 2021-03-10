@@ -54,11 +54,7 @@ public class YangToJson {
             if (node.getStatus() == Status.DEPRECATED) {
                 continue;
             }
-            if (node instanceof DataNodeContainer) {
-                containers.put(node.getQName().getLocalName(), getContainer(node));
-            } else if (isLeafLikeNode(node)) {
-                leaves.put(node.getQName().getLocalName(), getDataNode(node));
-            }
+            putNodeInLeavesOrContainers(leaves, containers, node);
         }
         if (!leaves.isEmpty()) {
             dataTreeDto.setLeaves(Optional.of(leaves));
@@ -91,17 +87,7 @@ public class YangToJson {
             if (node.getStatus() == Status.DEPRECATED) {
                 continue;
             }
-            String nodeName = node.getQName().getLocalName();
-            if (node.isAugmenting()) {
-                String moduleName = schemaContext.findModules(node.getQName().getNamespace())
-                        .iterator().next().getName();
-                nodeName = moduleName + ":" + nodeName;
-            }
-            if (node instanceof DataNodeContainer) {
-                containers.put(nodeName, getContainer(node));
-            } else if (isLeafLikeNode(node)) {
-                leaves.put(nodeName, getDataNode(node));
-            }
+            putNodeInLeavesOrContainers(leaves, containers, node);
         }
         if (!leaves.isEmpty()) {
             containerDto.setLeaves(Optional.of(leaves));
@@ -112,11 +98,26 @@ public class YangToJson {
         return containerDto;
     }
 
+    private void putNodeInLeavesOrContainers(Map<String, LeafDto> leaves, Map<String, ContainerDto> containers, DataSchemaNode node) {
+        String nodeName = node.getQName().getLocalName();
+        if (node.isAugmenting()) {
+            String moduleName = schemaContext.findModules(node.getQName().getNamespace())
+                    .iterator().next().getName();
+            nodeName = moduleName + ":" + nodeName;
+        }
+        if (node instanceof DataNodeContainer) {
+            containers.put(nodeName, getContainer(node));
+        } else if (isLeafLikeNode(node)) {
+            leaves.put(nodeName, getDataNode(node));
+        }
+    }
+
     private boolean isLeafLikeNode(DataSchemaNode node) {
         return node instanceof LeafSchemaNode
                 || node instanceof LeafListSchemaNode
                 || node instanceof AnydataSchemaNode
-                || node instanceof AnyxmlSchemaNode;
+                || node instanceof AnyxmlSchemaNode
+                || node instanceof ChoiceSchemaNode;
     }
 
     private LeafDto getDataNode(DataSchemaNode childNode) {
@@ -153,13 +154,25 @@ public class YangToJson {
         }
 
         Map<String, CaseDto> cases = new HashMap<>();
-        Map<String, LeafDto> leaves = new HashMap<>();
-        Map<String, ContainerDto> choiceCases = new HashMap<>();
-
         for (CaseSchemaNode caseNode : choiceNode.getCases()) {
-            for (DataSchemaNode childNode : caseNode.getChildNodes()) {
-                leaves.put(childNode.getQName().getLocalName(), getDataNode(childNode));
+            CaseDto caseDto = new CaseDto();
+            Map<String, LeafDto> leaves = new HashMap<>();
+            Map<String, ContainerDto> containers = new HashMap<>();
+
+            for (DataSchemaNode node : caseNode.getChildNodes()) {
+                if (node.getStatus() == Status.DEPRECATED) {
+                    continue;
+                }
+                putNodeInLeavesOrContainers(leaves, containers, node);
             }
+
+            if (!leaves.isEmpty()) {
+                caseDto.setLeaves(Optional.of(leaves));
+            }
+            if (!containers.isEmpty()) {
+                caseDto.setContainers(Optional.of(containers));
+            }
+            cases.put(caseNode.getQName().getLocalName(), caseDto);
         }
 
         leafDto.setCases(Optional.of(cases));

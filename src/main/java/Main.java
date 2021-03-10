@@ -33,7 +33,7 @@ public class Main {
 
         schemaContext = reactor.buildEffective();
 
-        Module module = schemaContext.findModules("ietf-interfaces").iterator().next();
+        Module module = schemaContext.findModules("ietf-netconf-monitoring").iterator().next();
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new Jdk8Module());
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
