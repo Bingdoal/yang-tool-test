@@ -1,20 +1,21 @@
 module o-ran-fm {
-  yang-version 1.1;
-  namespace "urn:o-ran:fm:1.0";
-  prefix "o-ran-fm";
+    yang-version 1.1;
+    namespace "urn:o-ran:fm:1.0";
+    prefix "o-ran-fm";
 
-  import ietf-yang-types {
-    prefix yang;
-    revision-date 2013-07-15;
-  }
+    import ietf-yang-types {
+        prefix yang;
+        revision-date 2013-07-15;
+    }
 
-  organization "O-RAN Alliance";
+    organization
+      "O-RAN Alliance";
 
-  contact
-    "www.o-ran.org";
+    contact
+      "www.o-ran.org";
 
-  description
-    "This module defines alarm reporting mechanism.
+    description
+      "This module defines alarm reporting mechanism.
 
     Copyright 2019 the O-RAN Alliance.
 
@@ -42,125 +43,126 @@ module o-ran-fm {
     contributors may be used to endorse or promote products derived from
     this software without specific prior written permission.";
 
-  revision "2019-02-04" {
-    description
-      "version 1.0.0
+    revision "2019-02-04" {
+        description
+          "version 1.0.0
 
       1) imported model from xRAN
       2) changed namespace and reference from xran to o-ran";
 
-    reference "ORAN-WG4.M.0-v01.00";
-  }
-
-  grouping alarm {
-    description
-      "Gropuping which can uniquely identify alarm";
-
-    leaf fault-id {
-      type uint16;
-      mandatory true;
-
-      description
-        "Fault specific Id that identifies the fault.";
+        reference
+          "ORAN-WG4.M.0-v01.00";
     }
 
-    leaf fault-source {
-      type string {
-        length "1..255";
-      }
-      mandatory true;
-
-      description
-        "Represents the Object or source that is suspected to be faulty.";
-    }
-
-    list affected-objects {
-      leaf name {
-        type string {
-          length "1..255";
-        }
-        mandatory true;
-
+    grouping alarm {
         description
-          "Represents the Object or source that is suspected to be affected by this fault";
-      }
-      min-elements 1;
-      max-elements 100;
+          "Gropuping which can uniquely identify alarm";
 
-      description
-        "List of affected-objects";
-    }
+        leaf fault-id {
+            type uint16;
+            mandatory true;
 
-    leaf fault-severity {
-      type enumeration {
-        enum CRITICAL {
-          description
-            "Critical alarm means that this device is not able to perform any further service";
+            description
+              "Fault specific Id that identifies the fault.";
         }
-        enum MAJOR {
-          description
-            "Major alarm appeared on the device";
-        }
-        enum MINOR {
-          description
-            "Minor alarm appeared on the device";
-        }
-        enum WARNING {
-          description
-            "Warning is being reported by the device";
-        }
-      }
-      mandatory true;
 
-      description
-        "Fault severity defines the severity level of the fault. A notification, whose fault severity has the value 'warning',
+        leaf fault-source {
+            type string {
+                length "1..255";
+            }
+            mandatory true;
+
+            description
+              "Represents the Object or source that is suspected to be faulty.";
+        }
+
+        list affected-objects {
+            leaf name {
+                type string {
+                    length "1..255";
+                }
+                mandatory true;
+
+                description
+                  "Represents the Object or source that is suspected to be affected by this fault";
+            }
+            min-elements 1;
+            max-elements 100;
+
+            description
+              "List of affected-objects";
+        }
+
+        leaf fault-severity {
+            type enumeration {
+                enum CRITICAL {
+                    description
+                      "Critical alarm means that this device is not able to perform any further service";
+                }
+                enum MAJOR {
+                    description
+                      "Major alarm appeared on the device";
+                }
+                enum MINOR {
+                    description
+                      "Minor alarm appeared on the device";
+                }
+                enum WARNING {
+                    description
+                      "Warning is being reported by the device";
+                }
+            }
+            mandatory true;
+
+            description
+              "Fault severity defines the severity level of the fault. A notification, whose fault severity has the value 'warning',
         is a special type of an alarm notification. For these alarm notifications,
         the Master Agent does not expect to receive a clear alarm notification.";
+        }
+
+        leaf is-cleared {
+            type boolean;
+            mandatory true;
+
+            description
+              "Fault state determines the type of the event. Not used if faultSeverity is WARNING.";
+        }
+
+        leaf fault-text {
+            type string {
+                length "0..255";
+            }
+
+            description
+              "Textual description of the fault.";
+        }
+
+        leaf event-time {
+            type yang:date-and-time;
+            mandatory true;
+
+            description
+              "Timestamp to indicate the time when the fault is detected/cleared.";
+        }
     }
 
-    leaf is-cleared {
-      type boolean;
-      mandatory true;
+    container active-alarm-list {
+        list active-alarms {
+            uses alarm;
 
-      description
-        "Fault state determines the type of the event. Not used if faultSeverity is WARNING.";
+            description
+              "List of currenty active alarms";
+        }
+        config false;
+
+        description
+          "List of currently active alarms. An alarm is removed from this table when the state transitions to clear.";
     }
 
-    leaf fault-text {
-      type string {
-        length "0..255";
-      }
+    notification alarm-notif {
+        uses alarm;
 
-      description
-        "Textual description of the fault.";
+        description
+          "Notification sent on initial alarm creation, as well as any time the alarm changes state, including clear";
     }
-
-    leaf event-time {
-      type yang:date-and-time;
-      mandatory true;
-
-      description
-        "Timestamp to indicate the time when the fault is detected/cleared.";
-    }
-  }
-
-  container active-alarm-list {
-    list active-alarms {
-      uses alarm;
-
-      description
-        "List of currenty active alarms";
-    }
-    config false;
-
-    description
-      "List of currently active alarms. An alarm is removed from this table when the state transitions to clear.";
-  }
-
-  notification alarm-notif {
-    uses alarm;
-
-    description
-      "Notification sent on initial alarm creation, as well as any time the alarm changes state, including clear";
-  }
 }

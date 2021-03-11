@@ -1,9 +1,5 @@
 module ietf-netconf {
-
-    // the namespace for NETCONF XML definitions is unchanged
-    // from RFC 4741, which this document replaces
     namespace "urn:ietf:params:xml:ns:netconf:base:1.0";
-
     prefix nc;
 
     import ietf-inet-types {
@@ -12,44 +8,43 @@ module ietf-netconf {
 
     organization
       "IETF NETCONF (Network Configuration) Working Group";
-
     contact
       "WG Web:   <http://tools.ietf.org/wg/netconf/>
-       WG List:  <netconf@ietf.org>
+     WG List:  <netconf@ietf.org>
 
-       WG Chair: Bert Wijnen
-                 <bertietf@bwijnen.net>
+     WG Chair: Bert Wijnen
+               <bertietf@bwijnen.net>
 
-       WG Chair: Mehmet Ersue
-                 <mehmet.ersue@nsn.com>
+     WG Chair: Mehmet Ersue
+               <mehmet.ersue@nsn.com>
 
-       Editor:   Martin Bjorklund
-                 <mbj@tail-f.com>
+     Editor:   Martin Bjorklund
+               <mbj@tail-f.com>
 
-       Editor:   Juergen Schoenwaelder
-                 <j.schoenwaelder@jacobs-university.de>
+     Editor:   Juergen Schoenwaelder
+               <j.schoenwaelder@jacobs-university.de>
 
-       Editor:   Andy Bierman
-                 <andy.bierman@brocade.com>";
+     Editor:   Andy Bierman
+               <andy.bierman@brocade.com>";
     description
       "NETCONF Protocol Data Types and Protocol Operations.
 
-       Copyright (c) 2011 IETF Trust and the persons identified as
-       the document authors.  All rights reserved.
+     Copyright (c) 2011 IETF Trust and the persons identified as
+     the document authors.  All rights reserved.
 
-       Redistribution and use in source and binary forms, with or
-       without modification, is permitted pursuant to, and subject
-       to the license terms contained in, the Simplified BSD License
-       set forth in Section 4.c of the IETF Trust's Legal Provisions
-       Relating to IETF Documents
-       (http://trustee.ietf.org/license-info).
+     Redistribution and use in source and binary forms, with or
+     without modification, is permitted pursuant to, and subject
+     to the license terms contained in, the Simplified BSD License
+     set forth in Section 4.c of the IETF Trust's Legal Provisions
+     Relating to IETF Documents
+     (http://trustee.ietf.org/license-info).
 
-       This version of this YANG module is part of RFC 6241; see
-       the RFC itself for full legal notices.";
+     This version of this YANG module is part of RFC 6241; see
+     the RFC itself for full legal notices.";
 
     revision 2011-06-01 {
         description
-          "Initial revision;";
+          "Initial revision";
         reference
           "RFC 6241: Network Configuration Protocol";
     }
@@ -57,35 +52,34 @@ module ietf-netconf {
     extension get-filter-element-attributes {
         description
           "If this extension is present within an 'anyxml'
-           statement named 'filter', which must be conceptually
-           defined within the RPC input section for the <get>
-           and <get-config> protocol operations, then the
-           following unqualified XML attribute is supported
-           within the <filter> element, within a <get> or
-           <get-config> protocol operation:
+       statement named 'filter', which must be conceptually
+       defined within the RPC input section for the <get>
+       and <get-config> protocol operations, then the
+       following unqualified XML attribute is supported
+       within the <filter> element, within a <get> or
+       <get-config> protocol operation:
 
-             type : optional attribute with allowed
-                    value strings 'subtree' and 'xpath'.
-                    If missing, the default value is 'subtree'.
+         type : optional attribute with allowed
+                value strings 'subtree' and 'xpath'.
+                If missing, the default value is 'subtree'.
 
-           If the 'xpath' feature is supported, then the
-           following unqualified XML attribute is
-           also supported:
+       If the 'xpath' feature is supported, then the
+       following unqualified XML attribute is
+       also supported:
 
-             select: optional attribute containing a
-                     string representing an XPath expression.
-                     The 'type' attribute must be equal to 'xpath'
-                     if this attribute is present.";
+         select: optional attribute containing a
+                 string representing an XPath expression.
+                 The 'type' attribute must be equal to 'xpath'
+                 if this attribute is present.";
     }
 
-    // NETCONF capabilities defined as features
     feature writable-running {
         description
           "NETCONF :writable-running capability;
-           If the server advertises the :writable-running
-           capability for a session, then this feature must
-           also be enabled for that session.  Otherwise,
-           this feature must not be enabled.";
+       If the server advertises the :writable-running
+       capability for a session, then this feature must
+       also be enabled for that session.  Otherwise,
+       this feature must not be enabled.";
         reference
           "RFC 6241, Section 8.2";
     }
@@ -93,23 +87,22 @@ module ietf-netconf {
     feature candidate {
         description
           "NETCONF :candidate capability;
-           If the server advertises the :candidate
-           capability for a session, then this feature must
-           also be enabled for that session.  Otherwise,
-           this feature must not be enabled.";
+       If the server advertises the :candidate
+       capability for a session, then this feature must
+       also be enabled for that session.  Otherwise,
+       this feature must not be enabled.";
         reference
           "RFC 6241, Section 8.3";
     }
 
     feature confirmed-commit {
-        if-feature candidate;
+        if-feature "candidate";
         description
           "NETCONF :confirmed-commit:1.1 capability;
-           If the server advertises the :confirmed-commit:1.1
-           capability for a session, then this feature must
-           also be enabled for that session.  Otherwise,
-           this feature must not be enabled.";
-
+       If the server advertises the :confirmed-commit:1.1
+       capability for a session, then this feature must
+       also be enabled for that session.  Otherwise,
+       this feature must not be enabled.";
         reference
           "RFC 6241, Section 8.4";
     }
@@ -117,10 +110,10 @@ module ietf-netconf {
     feature rollback-on-error {
         description
           "NETCONF :rollback-on-error capability;
-           If the server advertises the :rollback-on-error
-           capability for a session, then this feature must
-           also be enabled for that session.  Otherwise,
-           this feature must not be enabled.";
+       If the server advertises the :rollback-on-error
+       capability for a session, then this feature must
+       also be enabled for that session.  Otherwise,
+       this feature must not be enabled.";
         reference
           "RFC 6241, Section 8.5";
     }
@@ -128,10 +121,10 @@ module ietf-netconf {
     feature validate {
         description
           "NETCONF :validate:1.1 capability;
-           If the server advertises the :validate:1.1
-           capability for a session, then this feature must
-           also be enabled for that session.  Otherwise,
-           this feature must not be enabled.";
+       If the server advertises the :validate:1.1
+       capability for a session, then this feature must
+       also be enabled for that session.  Otherwise,
+       this feature must not be enabled.";
         reference
           "RFC 6241, Section 8.6";
     }
@@ -139,10 +132,10 @@ module ietf-netconf {
     feature startup {
         description
           "NETCONF :startup capability;
-           If the server advertises the :startup
-           capability for a session, then this feature must
-           also be enabled for that session.  Otherwise,
-           this feature must not be enabled.";
+       If the server advertises the :startup
+       capability for a session, then this feature must
+       also be enabled for that session.  Otherwise,
+       this feature must not be enabled.";
         reference
           "RFC 6241, Section 8.7";
     }
@@ -150,10 +143,10 @@ module ietf-netconf {
     feature url {
         description
           "NETCONF :url capability;
-           If the server advertises the :url
-           capability for a session, then this feature must
-           also be enabled for that session.  Otherwise,
-           this feature must not be enabled.";
+       If the server advertises the :url
+       capability for a session, then this feature must
+       also be enabled for that session.  Otherwise,
+       this feature must not be enabled.";
         reference
           "RFC 6241, Section 8.8";
     }
@@ -161,15 +154,14 @@ module ietf-netconf {
     feature xpath {
         description
           "NETCONF :xpath capability;
-           If the server advertises the :xpath
-           capability for a session, then this feature must
-           also be enabled for that session.  Otherwise,
-           this feature must not be enabled.";
+       If the server advertises the :xpath
+       capability for a session, then this feature must
+       also be enabled for that session.  Otherwise,
+       this feature must not be enabled.";
         reference
           "RFC 6241, Section 8.9";
     }
 
-    // NETCONF Simple Types
     typedef session-id-type {
         type uint32 {
             range "1..max";
@@ -183,109 +175,110 @@ module ietf-netconf {
         description
           "NETCONF Session Id or Zero to indicate none";
     }
+
     typedef error-tag-type {
         type enumeration {
-            enum in-use {
+            enum "in-use" {
                 description
                   "The request requires a resource that
-                   already is in use.";
+           already is in use.";
             }
-            enum invalid-value {
+            enum "invalid-value" {
                 description
                   "The request specifies an unacceptable value for one
-                   or more parameters.";
+           or more parameters.";
             }
-            enum too-big {
+            enum "too-big" {
                 description
                   "The request or response (that would be generated) is
-                   too large for the implementation to handle.";
+           too large for the implementation to handle.";
             }
-            enum missing-attribute {
+            enum "missing-attribute" {
                 description
                   "An expected attribute is missing.";
             }
-            enum bad-attribute {
+            enum "bad-attribute" {
                 description
                   "An attribute value is not correct; e.g., wrong type,
-                   out of range, pattern mismatch.";
+           out of range, pattern mismatch.";
             }
-            enum unknown-attribute {
+            enum "unknown-attribute" {
                 description
                   "An unexpected attribute is present.";
             }
-            enum missing-element {
+            enum "missing-element" {
                 description
                   "An expected element is missing.";
             }
-            enum bad-element {
+            enum "bad-element" {
                 description
                   "An element value is not correct; e.g., wrong type,
-                   out of range, pattern mismatch.";
+           out of range, pattern mismatch.";
             }
-            enum unknown-element {
+            enum "unknown-element" {
                 description
                   "An unexpected element is present.";
             }
-            enum unknown-namespace {
+            enum "unknown-namespace" {
                 description
                   "An unexpected namespace is present.";
             }
-            enum access-denied {
+            enum "access-denied" {
                 description
                   "Access to the requested protocol operation or
-                   data model is denied because authorization failed.";
+           data model is denied because authorization failed.";
             }
-            enum lock-denied {
+            enum "lock-denied" {
                 description
                   "Access to the requested lock is denied because the
-                   lock is currently held by another entity.";
+           lock is currently held by another entity.";
             }
-            enum resource-denied {
+            enum "resource-denied" {
                 description
                   "Request could not be completed because of
-                   insufficient resources.";
+           insufficient resources.";
             }
-            enum rollback-failed {
+            enum "rollback-failed" {
                 description
                   "Request to roll back some configuration change (via
-                   rollback-on-error or <discard-changes> operations)
-                   was not completed for some reason.";
+           rollback-on-error or <discard-changes> operations)
+           was not completed for some reason.";
             }
-            enum data-exists {
+            enum "data-exists" {
                 description
                   "Request could not be completed because the relevant
-                   data model content already exists.  For example,
-                   a 'create' operation was attempted on data that
-                   already exists.";
+           data model content already exists.  For example,
+           a 'create' operation was attempted on data that
+           already exists.";
             }
-            enum data-missing {
+            enum "data-missing" {
                 description
                   "Request could not be completed because the relevant
-                   data model content does not exist.  For example,
-                   a 'delete' operation was attempted on
-                   data that does not exist.";
+           data model content does not exist.  For example,
+           a 'delete' operation was attempted on
+           data that does not exist.";
             }
-            enum operation-not-supported {
+            enum "operation-not-supported" {
                 description
                   "Request could not be completed because the requested
-                   operation is not supported by this implementation.";
+           operation is not supported by this implementation.";
             }
-            enum operation-failed {
+            enum "operation-failed" {
                 description
                   "Request could not be completed because the requested
-                   operation failed for some reason not covered by
-                   any other error condition.";
+           operation failed for some reason not covered by
+           any other error condition.";
             }
-            enum partial-operation {
+            enum "partial-operation" {
                 description
                   "This error-tag is obsolete, and SHOULD NOT be sent
-                   by servers conforming to this document.";
+           by servers conforming to this document.";
             }
-            enum malformed-message {
+            enum "malformed-message" {
                 description
                   "A message could not be handled because it failed to
-                   be parsed correctly.  For example, the message is not
-                   well-formed XML or it uses an invalid character set.";
+           be parsed correctly.  For example, the message is not
+           well-formed XML or it uses an invalid character set.";
             }
         }
         description
@@ -296,11 +289,11 @@ module ietf-netconf {
 
     typedef error-severity-type {
         type enumeration {
-            enum error {
+            enum "error" {
                 description
                   "Error severity";
             }
-            enum warning {
+            enum "warning" {
                 description
                   "Warning severity";
             }
@@ -313,55 +306,55 @@ module ietf-netconf {
 
     typedef edit-operation-type {
         type enumeration {
-            enum merge {
+            enum "merge" {
                 description
                   "The configuration data identified by the
-                   element containing this attribute is merged
-                   with the configuration at the corresponding
-                   level in the configuration datastore identified
-                   by the target parameter.";
+           element containing this attribute is merged
+           with the configuration at the corresponding
+           level in the configuration datastore identified
+           by the target parameter.";
             }
-            enum replace {
+            enum "replace" {
                 description
                   "The configuration data identified by the element
-                   containing this attribute replaces any related
-                   configuration in the configuration datastore
-                   identified by the target parameter.  If no such
-                   configuration data exists in the configuration
-                   datastore, it is created.  Unlike a
-                   <copy-config> operation, which replaces the
-                   entire target configuration, only the configuration
-                   actually present in the config parameter is affected.";
+           containing this attribute replaces any related
+           configuration in the configuration datastore
+           identified by the target parameter.  If no such
+           configuration data exists in the configuration
+           datastore, it is created.  Unlike a
+           <copy-config> operation, which replaces the
+           entire target configuration, only the configuration
+           actually present in the config parameter is affected.";
             }
-            enum create {
+            enum "create" {
                 description
                   "The configuration data identified by the element
-                   containing this attribute is added to the
-                   configuration if and only if the configuration
-                   data does not already exist in the configuration
-                   datastore.  If the configuration data exists, an
-                   <rpc-error> element is returned with an
-                   <error-tag> value of 'data-exists'.";
+           containing this attribute is added to the
+           configuration if and only if the configuration
+           data does not already exist in the configuration
+           datastore.  If the configuration data exists, an
+           <rpc-error> element is returned with an
+           <error-tag> value of 'data-exists'.";
             }
-            enum delete {
+            enum "delete" {
                 description
                   "The configuration data identified by the element
-                   containing this attribute is deleted from the
-                   configuration if and only if the configuration
-                   data currently exists in the configuration
-                   datastore.  If the configuration data does not
-                   exist, an <rpc-error> element is returned with
-                   an <error-tag> value of 'data-missing'.";
+           containing this attribute is deleted from the
+           configuration if and only if the configuration
+           data currently exists in the configuration
+           datastore.  If the configuration data does not
+           exist, an <rpc-error> element is returned with
+           an <error-tag> value of 'data-missing'.";
             }
-            enum remove {
+            enum "remove" {
                 description
                   "The configuration data identified by the element
-                   containing this attribute is deleted from the
-                   configuration if the configuration
-                   data currently exists in the configuration
-                   datastore.  If the configuration data does not
-                   exist, the 'remove' operation is silently ignored
-                   by the server.";
+           containing this attribute is deleted from the
+           configuration if the configuration
+           data currently exists in the configuration
+           datastore.  If the configuration data does not
+           exist, the 'remove' operation is silently ignored
+           by the server.";
             }
         }
         default "merge";
@@ -371,50 +364,48 @@ module ietf-netconf {
           "RFC 6241, Section 7.2";
     }
 
-    // NETCONF Standard Protocol Operations
     rpc get-config {
         description
           "Retrieve all or part of a specified configuration.";
-
         reference
           "RFC 6241, Section 7.1";
-
         input {
             container source {
                 description
                   "Particular configuration to retrieve.";
-
                 choice config-source {
                     mandatory true;
                     description
                       "The configuration to retrieve.";
                     leaf candidate {
-                        if-feature candidate;
+                        if-feature "candidate";
                         type empty;
                         description
                           "The candidate configuration is the config source.";
                     }
+
                     leaf running {
                         type empty;
                         description
                           "The running configuration is the config source.";
                     }
+
                     leaf startup {
-                        if-feature startup;
+                        if-feature "startup";
                         type empty;
                         description
                           "The startup configuration is the config source.
-                           This is optional-to-implement on the server because
-                           not all servers will support filtering for this
-                           datastore.";
+               This is optional-to-implement on the server because
+               not all servers will support filtering for this
+               datastore.";
                     }
                 }
             }
 
             anyxml filter {
+                nc:get-filter-element-attributes;
                 description
                   "Subtree or XPath filter to use.";
-                nc:get-filter-element-attributes;
             }
         }
 
@@ -422,8 +413,8 @@ module ietf-netconf {
             anyxml data {
                 description
                   "Copy of the source datastore subset that matched
-                   the filter criteria (if any).  An empty data container
-                   indicates that the request did not produce any results.";
+           the filter criteria (if any).  An empty data container
+           indicates that the request did not produce any results.";
             }
         }
     }
@@ -431,29 +422,26 @@ module ietf-netconf {
     rpc edit-config {
         description
           "The <edit-config> operation loads all or part of a specified
-           configuration to the specified target configuration.";
-
+       configuration to the specified target configuration.";
         reference
           "RFC 6241, Section 7.2";
-
         input {
             container target {
                 description
                   "Particular configuration to edit.";
-
                 choice config-target {
                     mandatory true;
                     description
                       "The configuration target.";
-
                     leaf candidate {
-                        if-feature candidate;
+                        if-feature "candidate";
                         type empty;
                         description
                           "The candidate configuration is the config target.";
                     }
+
                     leaf running {
-                        if-feature writable-running;
+                        if-feature "writable-running";
                         type empty;
                         description
                           "The running configuration is the config source.";
@@ -463,15 +451,15 @@ module ietf-netconf {
 
             leaf default-operation {
                 type enumeration {
-                    enum merge {
+                    enum "merge" {
                         description
                           "The default operation is merge.";
                     }
-                    enum replace {
+                    enum "replace" {
                         description
                           "The default operation is replace.";
                     }
-                    enum none {
+                    enum "none" {
                         description
                           "There is no default operation.";
                     }
@@ -482,21 +470,20 @@ module ietf-netconf {
             }
 
             leaf test-option {
-                if-feature validate;
+                if-feature "validate";
                 type enumeration {
-                    enum test-then-set {
+                    enum "test-then-set" {
                         description
                           "The server will test and then set if no errors.";
                     }
-                    enum set {
+                    enum "set" {
                         description
                           "The server will set without a test first.";
                     }
-
-                    enum test-only {
+                    enum "test-only" {
                         description
                           "The server will only test and not set, even
-                           if there are no errors.";
+               if there are no errors.";
                     }
                 }
                 default "test-then-set";
@@ -506,19 +493,19 @@ module ietf-netconf {
 
             leaf error-option {
                 type enumeration {
-                    enum stop-on-error {
+                    enum "stop-on-error" {
                         description
                           "The server will stop on errors.";
                     }
-                    enum continue-on-error {
+                    enum "continue-on-error" {
                         description
                           "The server may continue on errors.";
                     }
-                    enum rollback-on-error {
+                    enum "rollback-on-error" {
                         description
                           "The server will roll back on errors.
-                           This value can only be used if the 'rollback-on-error'
-                           feature is supported.";
+               This value can only be used if the 'rollback-on-error'
+               feature is supported.";
                     }
                 }
                 default "stop-on-error";
@@ -530,13 +517,13 @@ module ietf-netconf {
                 mandatory true;
                 description
                   "The content for the edit operation.";
-
                 anyxml config {
                     description
                       "Inline Config content.";
                 }
+
                 leaf url {
-                    if-feature url;
+                    if-feature "url";
                     type inet:uri;
                     description
                       "URL-based config content.";
@@ -548,42 +535,41 @@ module ietf-netconf {
     rpc copy-config {
         description
           "Create or replace an entire configuration datastore with the
-           contents of another complete configuration datastore.";
-
+       contents of another complete configuration datastore.";
         reference
           "RFC 6241, Section 7.3";
-
         input {
             container target {
                 description
                   "Particular configuration to copy to.";
-
                 choice config-target {
                     mandatory true;
                     description
                       "The configuration target of the copy operation.";
-
                     leaf candidate {
-                        if-feature candidate;
+                        if-feature "candidate";
                         type empty;
                         description
                           "The candidate configuration is the config target.";
                     }
+
                     leaf running {
-                        if-feature writable-running;
+                        if-feature "writable-running";
                         type empty;
                         description
                           "The running configuration is the config target.
-                           This is optional-to-implement on the server.";
+               This is optional-to-implement on the server.";
                     }
+
                     leaf startup {
-                        if-feature startup;
+                        if-feature "startup";
                         type empty;
                         description
                           "The startup configuration is the config target.";
                     }
+
                     leaf url {
-                        if-feature url;
+                        if-feature "url";
                         type inet:uri;
                         description
                           "The URL-based configuration is the config target.";
@@ -594,40 +580,42 @@ module ietf-netconf {
             container source {
                 description
                   "Particular configuration to copy from.";
-
                 choice config-source {
                     mandatory true;
                     description
                       "The configuration source for the copy operation.";
-
                     leaf candidate {
-                        if-feature candidate;
+                        if-feature "candidate";
                         type empty;
                         description
                           "The candidate configuration is the config source.";
                     }
+
                     leaf running {
                         type empty;
                         description
                           "The running configuration is the config source.";
                     }
+
                     leaf startup {
-                        if-feature startup;
+                        if-feature "startup";
                         type empty;
                         description
                           "The startup configuration is the config source.";
                     }
+
                     leaf url {
-                        if-feature url;
+                        if-feature "url";
                         type inet:uri;
                         description
                           "The URL-based configuration is the config source.";
                     }
+
                     anyxml config {
                         description
                           "Inline Config content: <config> element.  Represents
-                           an entire configuration datastore, not
-                           a subset of the running datastore.";
+               an entire configuration datastore, not
+               a subset of the running datastore.";
                     }
                 }
             }
@@ -637,28 +625,25 @@ module ietf-netconf {
     rpc delete-config {
         description
           "Delete a configuration datastore.";
-
         reference
           "RFC 6241, Section 7.4";
-
         input {
             container target {
                 description
                   "Particular configuration to delete.";
-
                 choice config-target {
                     mandatory true;
                     description
                       "The configuration target to delete.";
-
                     leaf startup {
-                        if-feature startup;
+                        if-feature "startup";
                         type empty;
                         description
                           "The startup configuration is the config target.";
                     }
+
                     leaf url {
-                        if-feature url;
+                        if-feature "url";
                         type inet:uri;
                         description
                           "The URL-based configuration is the config target.";
@@ -671,34 +656,32 @@ module ietf-netconf {
     rpc lock {
         description
           "The lock operation allows the client to lock the configuration
-           system of a device.";
-
+       system of a device.";
         reference
           "RFC 6241, Section 7.5";
-
         input {
             container target {
                 description
                   "Particular configuration to lock.";
-
                 choice config-target {
                     mandatory true;
                     description
                       "The configuration target to lock.";
-
                     leaf candidate {
-                        if-feature candidate;
+                        if-feature "candidate";
                         type empty;
                         description
                           "The candidate configuration is the config target.";
                     }
+
                     leaf running {
                         type empty;
                         description
                           "The running configuration is the config target.";
                     }
+
                     leaf startup {
-                        if-feature startup;
+                        if-feature "startup";
                         type empty;
                         description
                           "The startup configuration is the config target.";
@@ -711,34 +694,32 @@ module ietf-netconf {
     rpc unlock {
         description
           "The unlock operation is used to release a configuration lock,
-           previously obtained with the 'lock' operation.";
-
+       previously obtained with the 'lock' operation.";
         reference
           "RFC 6241, Section 7.6";
-
         input {
             container target {
                 description
                   "Particular configuration to unlock.";
-
                 choice config-target {
                     mandatory true;
                     description
                       "The configuration target to unlock.";
-
                     leaf candidate {
-                        if-feature candidate;
+                        if-feature "candidate";
                         type empty;
                         description
                           "The candidate configuration is the config target.";
                     }
+
                     leaf running {
                         type empty;
                         description
                           "The running configuration is the config target.";
                     }
+
                     leaf startup {
-                        if-feature startup;
+                        if-feature "startup";
                         type empty;
                         description
                           "The startup configuration is the config target.";
@@ -751,16 +732,14 @@ module ietf-netconf {
     rpc get {
         description
           "Retrieve running configuration and device state information.";
-
         reference
           "RFC 6241, Section 7.7";
-
         input {
             anyxml filter {
+                nc:get-filter-element-attributes;
                 description
                   "This parameter specifies the portion of the system
-                   configuration and state data to retrieve.";
-                nc:get-filter-element-attributes;
+           configuration and state data to retrieve.";
             }
         }
 
@@ -768,9 +747,9 @@ module ietf-netconf {
             anyxml data {
                 description
                   "Copy of the running datastore subset and/or state
-                   data that matched the filter criteria (if any).
-                   An empty data container indicates that the request did not
-                   produce any results.";
+           data that matched the filter criteria (if any).
+           An empty data container indicates that the request did not
+           produce any results.";
             }
         }
     }
@@ -778,7 +757,6 @@ module ietf-netconf {
     rpc close-session {
         description
           "Request graceful termination of a NETCONF session.";
-
         reference
           "RFC 6241, Section 7.8";
     }
@@ -786,10 +764,8 @@ module ietf-netconf {
     rpc kill-session {
         description
           "Force the termination of a NETCONF session.";
-
         reference
           "RFC 6241, Section 7.9";
-
         input {
             leaf session-id {
                 type session-id-type;
@@ -801,18 +777,15 @@ module ietf-netconf {
     }
 
     rpc commit {
-        if-feature candidate;
-
+        if-feature "candidate";
         description
           "Commit the candidate configuration as the device's new
-           current configuration.";
-
+       current configuration.";
         reference
           "RFC 6241, Section 8.3.4.1";
-
         input {
             leaf confirmed {
-                if-feature confirmed-commit;
+                if-feature "confirmed-commit";
                 type empty;
                 description
                   "Requests a confirmed commit.";
@@ -821,12 +794,12 @@ module ietf-netconf {
             }
 
             leaf confirm-timeout {
-                if-feature confirmed-commit;
+                if-feature "confirmed-commit";
                 type uint32 {
                     range "1..max";
                 }
                 units "seconds";
-                default "600"; // 10 minutes
+                default "600";
                 description
                   "The timeout interval for a confirmed commit.";
                 reference
@@ -834,34 +807,34 @@ module ietf-netconf {
             }
 
             leaf persist {
-                if-feature confirmed-commit;
+                if-feature "confirmed-commit";
                 type string;
                 description
                   "This parameter is used to make a confirmed commit
-                   persistent.  A persistent confirmed commit is not aborted
-                   if the NETCONF session terminates.  The only way to abort
-                   a persistent confirmed commit is to let the timer expire,
-                   or to use the <cancel-commit> operation.
+           persistent.  A persistent confirmed commit is not aborted
+           if the NETCONF session terminates.  The only way to abort
+           a persistent confirmed commit is to let the timer expire,
+           or to use the <cancel-commit> operation.
 
-                   The value of this parameter is a token that must be given
-                   in the 'persist-id' parameter of <commit> or
-                   <cancel-commit> operations in order to confirm or cancel
-                   the persistent confirmed commit.
+           The value of this parameter is a token that must be given
+           in the 'persist-id' parameter of <commit> or
+           <cancel-commit> operations in order to confirm or cancel
+           the persistent confirmed commit.
 
-                   The token should be a random string.";
+           The token should be a random string.";
                 reference
                   "RFC 6241, Section 8.3.4.1";
             }
 
             leaf persist-id {
-                if-feature confirmed-commit;
+                if-feature "confirmed-commit";
                 type string;
                 description
                   "This parameter is given in order to commit a persistent
-                    confirmed commit.  The value must be equal to the value
-                    given in the 'persist' parameter to the <commit> operation.
-                    If it does not match, the operation fails with an
-                   'invalid-value' error.";
+           confirmed commit.  The value must be equal to the value
+           given in the 'persist' parameter to the <commit> operation.
+           If it does not match, the operation fails with an
+           'invalid-value' error.";
                 reference
                   "RFC 6241, Section 8.3.4.1";
             }
@@ -869,85 +842,82 @@ module ietf-netconf {
     }
 
     rpc discard-changes {
-        if-feature candidate;
-
+        if-feature "candidate";
         description
           "Revert the candidate configuration to the current
-           running configuration.";
+       running configuration.";
         reference
           "RFC 6241, Section 8.3.4.2";
     }
 
     rpc cancel-commit {
-        if-feature confirmed-commit;
+        if-feature "confirmed-commit";
         description
           "This operation is used to cancel an ongoing confirmed commit.
-           If the confirmed commit is persistent, the parameter
-           'persist-id' must be given, and it must match the value of the
-           'persist' parameter.";
+       If the confirmed commit is persistent, the parameter
+       'persist-id' must be given, and it must match the value of the
+       'persist' parameter.";
         reference
           "RFC 6241, Section 8.4.4.1";
-
         input {
             leaf persist-id {
                 type string;
                 description
                   "This parameter is given in order to cancel a persistent
-                    confirmed commit.  The value must be equal to the value
-                    given in the 'persist' parameter to the <commit> operation.
-                    If it does not match, the operation fails with an
-                   'invalid-value' error.";
+           confirmed commit.  The value must be equal to the value
+           given in the 'persist' parameter to the <commit> operation.
+           If it does not match, the operation fails with an
+           'invalid-value' error.";
             }
         }
     }
 
     rpc validate {
-        if-feature validate;
-
+        if-feature "validate";
         description
           "Validates the contents of the specified configuration.";
-
         reference
           "RFC 6241, Section 8.6.4.1";
-
         input {
             container source {
                 description
                   "Particular configuration to validate.";
-
                 choice config-source {
                     mandatory true;
                     description
                       "The configuration source to validate.";
-
                     leaf candidate {
-                        if-feature candidate;
+                        if-feature "candidate";
                         type empty;
                         description
                           "The candidate configuration is the config source.";
                     }
+
                     leaf running {
                         type empty;
                         description
                           "The running configuration is the config source.";
                     }
+
                     leaf startup {
-                        if-feature startup;
+                        if-feature "startup";
                         type empty;
                         description
                           "The startup configuration is the config source.";
                     }
+
                     leaf url {
-                        if-feature url;
+                        if-feature "url";
                         type inet:uri;
                         description
                           "The URL-based configuration is the config source.";
                     }
+
                     anyxml config {
                         description
                           "Inline Config content: <config> element.  Represents
-                           an entire configuration datastore, not
-                           a subset of the running datastore.";
+               an entire configuration datastore, not
+               a subset of the running datastore.";
                     }
                 }
             }

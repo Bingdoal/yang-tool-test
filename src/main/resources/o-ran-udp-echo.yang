@@ -1,19 +1,20 @@
 module o-ran-udp-echo {
-  yang-version 1.1;
-  namespace "urn:o-ran:udpecho:1.0";
-  prefix "o-ran-echo";
+    yang-version 1.1;
+    namespace "urn:o-ran:udpecho:1.0";
+    prefix "o-ran-echo";
 
-  import o-ran-interfaces {
-    prefix "o-ran-int";
-  }
+    import o-ran-interfaces {
+        prefix "o-ran-int";
+    }
 
-  organization "O-RAN Alliance";
+    organization
+      "O-RAN Alliance";
 
-  contact
-    "www.o-ran.org";
+    contact
+      "www.o-ran.org";
 
-  description
-    "This module covers off aspects of interface transport
+    description
+      "This module covers off aspects of interface transport
     verification for UDP/IP based C/U plane connections based on UDP Echo.
 
     Copyright 2019 the O-RAN Alliance.
@@ -42,54 +43,56 @@ module o-ran-udp-echo {
     contributors may be used to endorse or promote products derived from
     this software without specific prior written permission.";
 
-  revision "2019-02-04" {
-    description
-      "version 1.0.0
+    revision "2019-02-04" {
+        description
+          "version 1.0.0
 
       1) imported model from xRAN
       2) changed namespace and reference from xran to o-ran";
 
-    reference "ORAN-WG4.M.0-v01.00";
-  }
+        reference
+          "ORAN-WG4.M.0-v01.00";
+    }
 
 // groupings
-
-  grouping udp-echo-group {
-    leaf enable-udp-echo {
-      type boolean;
-      default false;
-      description
-        "whether O-RU's UDP ech server is enabled";
-    }
-
-    leaf dscp-config {
-      type enumeration {
-        enum REFLECTIVE {
-          description
-            "DSCP in echoed datagrams is copied from received datagram";
+    grouping udp-echo-group {
+        leaf enable-udp-echo {
+            type boolean;
+            default false;
+            description
+              "whether O-RU's UDP ech server is enabled";
         }
-        enum EF {
-          description
-            "DSCP in echoed datagrams is always be set to expeditied
+
+        leaf dscp-config {
+            type enumeration {
+                enum REFLECTIVE {
+                    description
+                      "DSCP in echoed datagrams is copied from received datagram";
+                }
+                enum EF {
+                    description
+                      "DSCP in echoed datagrams is always be set to expeditied
             forwarding Per Hop Behaviour.";
+                }
+            }
+            default EF;
+            description
+              "configuration of UDP echo DSCP";
         }
-      }
-      default EF;
-      description "configuration of UDP echo DSCP";
+
+        leaf echo-replies-transmitted {
+            type uint32;
+            config false;
+            description
+              "The total number of UDP echo replies transmitted by the O-RU.";
+        }
     }
 
-    leaf echo-replies-transmitted {
-      type uint32;
-      config false;
-      description
-        "The total number of UDP echo replies transmitted by the O-RU.";
+    container udp-echo {
+        if-feature o-ran-int:UDPIP-BASED-CU-PLANE;
+        description
+          "container for udp echo";
+
+        uses udp-echo-group;
     }
-  }
-
-  container udp-echo {
-    if-feature o-ran-int:UDPIP-BASED-CU-PLANE;
-    description "container for udp echo";
-
-    uses udp-echo-group;
-  }
 }

@@ -2529,8 +2529,8 @@ module o-ran-uplane-conf {
           type uint16;
           mandatory true;
           description
-            "This parameter defines number of consecutive symbols covered by specific srs-pattern. 
-             Single srs-pattern may address at least one symbol. However, possible optimizations 
+            "This parameter defines number of consecutive symbols covered by specific srs-pattern.
+             Single srs-pattern may address at least one symbol. However, possible optimizations
              could allow for several (up to 14) symbols.";
         }
 

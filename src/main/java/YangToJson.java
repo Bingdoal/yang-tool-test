@@ -1,3 +1,7 @@
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.Range;
 import org.opendaylight.yangtools.yang.common.YangConstants;
 import org.opendaylight.yangtools.yang.model.api.*;
@@ -10,17 +14,33 @@ import org.opendaylight.yangtools.yang.parser.stmt.reactor.EffectiveSchemaContex
 import schema.*;
 import schema.type.BitsType;
 
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.WRITE;
+
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.List;
 
 public class YangToJson {
     public final FileFilter YANG_FILE_FILTER =
             file -> file.getName().endsWith(YangConstants.RFC6020_YANG_FILE_EXTENSION) && file.isFile();
     public EffectiveSchemaContext schemaContext;
     private Module module;
+    private ObjectMapper mapper;
+
+    public YangToJson() {
+        mapper = new ObjectMapper();
+        mapper.registerModule(new Jdk8Module());
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    }
 
     public Collection<YangStatementStreamSource> getSource(String path) throws URISyntaxException, IOException, YangSyntaxErrorException {
         File sourcesDir = new File(Main.class.getResource(path).toURI());
@@ -32,13 +52,35 @@ public class YangToJson {
         return sources;
     }
 
+    public void convertToDto(EffectiveSchemaContext schemaContext) {
+        for (Module module : schemaContext.getModules()) {
+            System.out.println("Module: " + module.getName());
+            ModuleDto moduleDto = convertToDto(schemaContext, module);
+            try {
+                String json = mapper.writeValueAsString(moduleDto);
+
+                Path dest = Paths.get("./parser_result/" + module.getName() + ".json");
+                Charset cs = Charset.forName("UTF-8");
+                try {
+                    Path p = Files.writeString(dest, json, cs, WRITE, CREATE);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(json);
+
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public ModuleDto convertToDto(EffectiveSchemaContext schemaContext, Module module) {
         this.schemaContext = schemaContext;
         this.module = module;
 
         ModuleDto moduleDto = new ModuleDto();
         moduleDto.setName(module.getName());
-        moduleDto.setNameSpace(module.getNamespace().toString());
+        moduleDto.setNamespace(module.getNamespace().toString());
         if (module.getRevision().isPresent()) {
             moduleDto.setRevision(module.getRevision().get().toString());
         }
@@ -53,19 +95,28 @@ public class YangToJson {
             moduleDto.setRpcs(Optional.of(rpcTree));
         }
 
-        Map<String, ContainerDto> notificationTree = getNotificationTree();
+        Map<String, ContainerDto> notificationTree = getNotificationTree(module.getNotifications());
         if (!notificationTree.isEmpty()) {
             moduleDto.setNotifications(Optional.of(notificationTree));
         }
         return moduleDto;
     }
 
+    private Map<String, ContainerDto> getNotificationTree(Collection<? extends NotificationDefinition> notifications) {
+        Map<String, ContainerDto> notificationTree = new HashMap<>();
+        for (NotificationDefinition notification : notifications) {
+            ContainerDto containerDto = getContainer(notification, true);
+            notificationTree.put(notification.getQName().getLocalName(), containerDto);
+        }
+        return notificationTree;
+    }
+
     private Map<String, RpcDto> getRpcTree(Collection<? extends RpcDefinition> rpcs) {
         Map<String, RpcDto> rpcTree = new HashMap<>();
         for (RpcDefinition rpc : rpcs) {
             RpcDto rpcDto = new RpcDto();
-            ContainerDto input = getContainer(rpc.getInput());
-            ContainerDto output = getContainer(rpc.getOutput());
+            ContainerDto input = getContainer(rpc.getInput(), true);
+            ContainerDto output = getContainer(rpc.getOutput(), true);
 
             if (!input.isEmpty()) {
                 rpcDto.setInput(Optional.of(input));
@@ -79,11 +130,6 @@ public class YangToJson {
     }
 
 
-    private Map<String, ContainerDto> getNotificationTree() {
-        Map<String, ContainerDto> notificationTree = new HashMap<>();
-        return notificationTree;
-    }
-
     private DataTreeDto getModuleDataTree(Collection<? extends DataSchemaNode> childNodes) {
         DataTreeDto dataTreeDto = new DataTreeDto();
         Map<String, LeafDto> leaves = new HashMap<>();
@@ -92,7 +138,8 @@ public class YangToJson {
             if (node.getStatus() == Status.DEPRECATED) {
                 continue;
             }
-            putNodeInLeavesOrContainers(leaves, containers, node);
+            boolean config = node.effectiveConfig().isPresent() ? node.effectiveConfig().get() : true;
+            putNodeInLeavesOrContainers(leaves, containers, node, config);
         }
         if (!leaves.isEmpty()) {
             dataTreeDto.setLeaves(Optional.of(leaves));
@@ -103,28 +150,33 @@ public class YangToJson {
         return dataTreeDto;
     }
 
-    private ContainerDto getContainer(DataSchemaNode childNode) {
-        DataNodeContainer dataNodeContainer = (DataNodeContainer) childNode;
+    private ContainerDto getContainer(DataNodeContainer dataNodeContainer, boolean defaultConfig) {
 
         ContainerDto containerDto = new ContainerDto();
         Map<String, LeafDto> leaves = new HashMap<>();
         Map<String, ContainerDto> containers = new HashMap<>();
+        containerDto.setConfig(defaultConfig);
 
-        if (childNode.effectiveConfig().isPresent()) {
-            containerDto.setConfig(childNode.effectiveConfig().get());
+        if (dataNodeContainer instanceof DataSchemaNode) {
+            DataSchemaNode childNode = (DataSchemaNode) dataNodeContainer;
+            if (childNode.effectiveConfig().isPresent()) {
+                containerDto.setConfig(childNode.effectiveConfig().get());
+            }
+            if (childNode instanceof ListSchemaNode) {
+                ListSchemaNode listSchemaNode = (ListSchemaNode) childNode;
+                containerDto.setList(true);
+                if (listSchemaNode.getKeyDefinition().size() > 0) {
+                    containerDto.setKey(Optional.of(listSchemaNode.getKeyDefinition().get(0).getLocalName()));
+                }
+            }
         }
-        if (childNode instanceof ListSchemaNode) {
-            ListSchemaNode listSchemaNode = (ListSchemaNode) childNode;
-            containerDto.setList(true);
-            containerDto.setKey(Optional.of(listSchemaNode.getKeyDefinition().get(0).getLocalName()));
-        }
-
 
         for (DataSchemaNode node : dataNodeContainer.getChildNodes()) {
             if (node.getStatus() == Status.DEPRECATED) {
                 continue;
             }
-            putNodeInLeavesOrContainers(leaves, containers, node);
+            boolean config = node.effectiveConfig().isPresent() ? node.effectiveConfig().get() : true;
+            putNodeInLeavesOrContainers(leaves, containers, node, config);
         }
         if (!leaves.isEmpty()) {
             containerDto.setLeaves(Optional.of(leaves));
@@ -135,7 +187,7 @@ public class YangToJson {
         return containerDto;
     }
 
-    private void putNodeInLeavesOrContainers(Map<String, LeafDto> leaves, Map<String, ContainerDto> containers, DataSchemaNode node) {
+    private void putNodeInLeavesOrContainers(Map<String, LeafDto> leaves, Map<String, ContainerDto> containers, DataSchemaNode node, boolean defaultConfig) {
         String nodeName = node.getQName().getLocalName();
         if (node.isAugmenting()) {
             String moduleName = schemaContext.findModules(node.getQName().getNamespace())
@@ -143,9 +195,9 @@ public class YangToJson {
             nodeName = moduleName + ":" + nodeName;
         }
         if (node instanceof DataNodeContainer) {
-            containers.put(nodeName, getContainer(node));
+            containers.put(nodeName, getContainer((DataNodeContainer) node, defaultConfig));
         } else if (isLeafLikeNode(node)) {
-            leaves.put(nodeName, getDataNode(node));
+            leaves.put(nodeName, getDataNode(node, defaultConfig));
         }
     }
 
@@ -157,8 +209,9 @@ public class YangToJson {
                 || node instanceof ChoiceSchemaNode;
     }
 
-    private LeafDto getDataNode(DataSchemaNode childNode) {
+    private LeafDto getDataNode(DataSchemaNode childNode, boolean defaultConfig) {
         LeafDto leafDto = new LeafDto();
+        leafDto.setConfig(defaultConfig);
         if (childNode.effectiveConfig().isPresent()) {
             leafDto.setConfig(childNode.effectiveConfig().get());
         }
@@ -199,7 +252,7 @@ public class YangToJson {
                 if (node.getStatus() == Status.DEPRECATED) {
                     continue;
                 }
-                putNodeInLeavesOrContainers(leaves, containers, node);
+                putNodeInLeavesOrContainers(leaves, containers, node, true);
             }
 
             if (!leaves.isEmpty()) {

@@ -1,19 +1,20 @@
 module o-ran-supervision {
-  yang-version 1.1;
-  namespace "urn:o-ran:supervision:1.0";
-  prefix "o-ran-supervision";
+    yang-version 1.1;
+    namespace "urn:o-ran:supervision:1.0";
+    prefix "o-ran-supervision";
 
-  import ietf-yang-types {
-    prefix yang;
-  }
+    import ietf-yang-types {
+        prefix yang;
+    }
 
-  organization "O-RAN Alliance";
+    organization
+      "O-RAN Alliance";
 
-  contact
-    "www.o-ran.org";
+    contact
+      "www.o-ran.org";
 
-  description
-    "This module defines the configuration data and supervision RPCs that are
+    description
+      "This module defines the configuration data and supervision RPCs that are
     used to detect loss M-Plane connectivity.
 
     Copyright 2020 the O-RAN Alliance.
@@ -42,52 +43,55 @@ module o-ran-supervision {
     contributors may be used to endorse or promote products derived from
     this software without specific prior written permission.";
 
-  revision "2020-04-17" {
-    description
-      "version 3.0.0
+    revision "2020-04-17" {
+        description
+          "version 3.0.0
 
       1) added output string to enable indication if config modification change has failed
       2) corrected model description
       3) removed erroneous text in notification description";
 
-    reference "ORAN-WG4.M.0-v03.00";
-  }
+        reference
+          "ORAN-WG4.M.0-v03.00";
+    }
 
-  revision "2019-07-03" {
-    description
-      "version 2.0.0
+    revision "2019-07-03" {
+        description
+          "version 2.0.0
 
       1) added leafs for CU plane monitoring
       2) backward compatible changes to introduce groupings";
 
-    reference "ORAN-WG4.M.0-v01.00";
-  }
+        reference
+          "ORAN-WG4.M.0-v01.00";
+    }
 
-  revision "2019-02-04" {
-    description
-      "version 1.0.0
+    revision "2019-02-04" {
+        description
+          "version 1.0.0
 
       1) imported model from xRAN
       2) changed namespace and reference from xran to o-ran";
 
-    reference "ORAN-WG4.M.0-v01.00";
-  }
-
-  grouping watchdog-input {
-    leaf supervision-notification-interval {
-      type uint16;
-      units seconds;
-      default 60;
-      description
-        "The interval in seconds at which supervision notifications are sent.
-        If not specified the default value of 60 seconds shall apply.";
+        reference
+          "ORAN-WG4.M.0-v01.00";
     }
-    leaf guard-timer-overhead {
-      type uint16;
-      units seconds;
-      default 10;
-      description
-        "This is overhead added to the supervision timer used to calculate the
+
+    grouping watchdog-input {
+        leaf supervision-notification-interval {
+            type uint16;
+            units seconds;
+            default 60;
+            description
+              "The interval in seconds at which supervision notifications are sent.
+        If not specified the default value of 60 seconds shall apply.";
+        }
+        leaf guard-timer-overhead {
+            type uint16;
+            units seconds;
+            default 10;
+            description
+              "This is overhead added to the supervision timer used to calculate the
          supervision wathcdog timer. i.e.,
 
          supervision timer = notification timer + guard-timer-overhead
@@ -102,43 +106,44 @@ module o-ran-supervision {
 
          This type of constraint (using an RPCs input) cannot be formally
          expressed in YANG.";
+        }
     }
-  }
 
-  grouping watchdog-output {
-    leaf next-update-at {
-      type yang:date-and-time;
-      description
-        "Indicates the time when the next supervision notification is expected.";
-    }
-    leaf error-message {
-      type string;
+    grouping watchdog-output {
+        leaf next-update-at {
+            type yang:date-and-time;
+            description
+              "Indicates the time when the next supervision notification is expected.";
+        }
+        leaf error-message {
+            type string;
 
-      description
-        "An optional error message, e.g., used when the RPC input attempts to
+            description
+              "An optional error message, e.g., used when the RPC input attempts to
         modify a locked running configuration.
 
         Take note, the supervision-notification-interval and guard-timer-overhead
         have default values and so their values can be modified even when a leaf is
         not included in the RPC input.";
+        }
     }
-  }
 
-  grouping supervision-group {
-    container cu-plane-monitoring {
-      description "container describing operation of CU plane monitoring";
-      presence
-        "Indicates O-RU supports timer based cu-plane monitoring interval. If
+    grouping supervision-group {
+        container cu-plane-monitoring {
+            description
+              "container describing operation of CU plane monitoring";
+            presence
+              "Indicates O-RU supports timer based cu-plane monitoring interval. If
         this container is NOT present, the opertaion of the O-RU is undefined.";
 
-      leaf configured-cu-monitoring-interval {
-        type uint8 {
-          range "0..160";
-        }
-        default 160;
-        units milliseconds;
-        description
-          "This value corresponds to the configured value of the timer used by
+            leaf configured-cu-monitoring-interval {
+                type uint8 {
+                    range "0..160";
+                }
+                default 160;
+                units milliseconds;
+                description
+                  "This value corresponds to the configured value of the timer used by
           the O-RU to monitor the C/U plane connection.
 
           A value of 0 means that the O-RU's shall disable its CU plane
@@ -157,30 +162,29 @@ module o-ran-supervision {
           iii) when operating with an O-DU supporting fault tolerant operation,
           this value can be configured according to the fault tolerant heartbeat
           interval ";
-      }
+            }
+        }
     }
-  }
 
-  container supervision {
-    uses supervision-group;
+    container supervision {
+        uses supervision-group;
     // other WG specific monitoring containers follow here
-  }
-
-  rpc supervision-watchdog-reset {
-    description
-      "rpc to reset the watchdog timer";
-    input {
-      uses watchdog-input;
     }
 
-	  output {
-      uses watchdog-output;
-	  }
-  }
+    rpc supervision-watchdog-reset {
+        description
+          "rpc to reset the watchdog timer";
+        input {
+            uses watchdog-input;
+        }
 
-  notification supervision-notification {
-    description
-      "Notification to indicate that NETCONF management interface is up.";
+        output {
+            uses watchdog-output;
+        }
+    }
 
-  }
+    notification supervision-notification {
+        description
+          "Notification to indicate that NETCONF management interface is up.";
+    }
 }

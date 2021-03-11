@@ -5,16 +5,14 @@ import schema.type.BitsType;
 
 import java.util.*;
 
-public class DataTreeDebugger {
+public class ParserDebugger {
 
-    public static void getContainer(DataSchemaNode childNode, int level) {
+    public static void getContainer(DataNodeContainer dataNodeContainer, int level) {
         Main.printIndent(level);
-        System.out.println(childNode.toString());
-
-        DataNodeContainer dataNodeContainer = (DataNodeContainer) childNode;
+        System.out.println(dataNodeContainer.toString());
         for (DataSchemaNode node : dataNodeContainer.getChildNodes()) {
             if (node instanceof DataNodeContainer) {
-                getContainer(node, level + 1);
+                getContainer((DataNodeContainer) node, level + 1);
             } else {
                 getDataNode(node, level + 1);
             }
@@ -137,5 +135,26 @@ public class DataTreeDebugger {
             }
         }
         return options;
+    }
+
+    public static void getRpc(RpcDefinition rpc, int level) {
+        Main.printIndent(level);
+        System.out.println("Input:");
+        for (DataSchemaNode childNode : rpc.getInput().getChildNodes()) {
+            if (childNode instanceof DataNodeContainer) {
+                ParserDebugger.getContainer((DataNodeContainer) childNode, level + 1);
+            } else {
+                ParserDebugger.getDataNode(childNode, level + 1);
+            }
+        }
+        Main.printIndent(level);
+        System.out.println("Output:");
+        for (DataSchemaNode childNode : rpc.getOutput().getChildNodes()) {
+            if (childNode instanceof DataNodeContainer) {
+                ParserDebugger.getContainer((DataNodeContainer) childNode, level + 1);
+            } else {
+                ParserDebugger.getDataNode(childNode, level + 1);
+            }
+        }
     }
 }

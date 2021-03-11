@@ -531,7 +531,7 @@ module o-ran-performance-management {
             uses o-ran-fm:credential-information;
         }
 
-        // transceiver measurements applicable to all O-RAN HW functions
+// transceiver measurements applicable to all O-RAN HW functions
         leaf transceiver-measurement-interval {
             type uint16;
             units seconds;
@@ -540,7 +540,7 @@ module o-ran-performance-management {
          measurement objects periodically.";
         }
 
-        // EPE measurements applicable to all O-RAN HW functions
+// EPE measurements applicable to all O-RAN HW functions
         leaf epe-measurement-interval {
             type uint16;
             units seconds;
@@ -549,7 +549,7 @@ module o-ran-performance-management {
          measurement objects periodically.";
         }
 
-        // RX Window measurements applicable to O-RAN WG4 defined functions
+// RX Window measurements applicable to O-RAN WG4 defined functions
         leaf rx-window-measurement-interval {
             type uint16;
             units seconds;
@@ -759,7 +759,7 @@ module o-ran-performance-management {
                   "the upper value of the last bin of frequency table.";
             }
             uses transceiver-measurement-result-grouping;
-        // configuration and measurement result for the transceiver-measurement
+// configuration and measurement result for the transceiver-measurement
         }
 
         list rx-window-measurement-objects {
@@ -885,7 +885,7 @@ module o-ran-performance-management {
             }
 
             uses rx-window-measurement-result-grouping;
-        // configuration and measurement result for the reception window stats
+// configuration and measurement result for the reception window stats
         }
 
         list tx-measurement-objects {
@@ -1148,7 +1148,7 @@ module o-ran-performance-management {
         uses measurement-group;
     }
 
-    // Notifications
+// Notifications
     notification measurement-result-stats {
         description
           "Notification may contain measurement results for transceiver-stats
