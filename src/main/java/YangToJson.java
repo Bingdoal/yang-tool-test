@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.Range;
 import org.opendaylight.yangtools.yang.common.YangConstants;
-import org.opendaylight.yangtools.yang.model.api.*;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.*;
 import org.opendaylight.yangtools.yang.model.api.type.*;
 import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
@@ -14,20 +14,18 @@ import org.opendaylight.yangtools.yang.parser.stmt.reactor.EffectiveSchemaContex
 import schema.*;
 import schema.type.BitsType;
 
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.WRITE;
-
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.List;
+
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 public class YangToJson {
     public final FileFilter YANG_FILE_FILTER =
@@ -58,11 +56,14 @@ public class YangToJson {
             ModuleDto moduleDto = convertToDto(schemaContext, module);
             try {
                 String json = mapper.writeValueAsString(moduleDto);
-
-                Path dest = Paths.get("./parser_result/" + module.getName() + ".json");
-                Charset cs = Charset.forName("UTF-8");
                 try {
-                    Path p = Files.writeString(dest, json, cs, WRITE, CREATE);
+                    Path destination;
+                    if (moduleDto.isEmpty()) {
+                        destination = Paths.get("./parser_result/empty/" + module.getName() + ".json");
+                    } else {
+                        destination = Paths.get("./parser_result/" + module.getName() + ".json");
+                    }
+                    Files.writeString(destination, json, StandardCharsets.UTF_8, WRITE, CREATE);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

@@ -109,3 +109,7 @@ fabric.properties
 target/
 .idea/
 parser_result/
+*.7z
+*.zip
+*.rar
+*.json
