@@ -15,7 +15,7 @@ public class DataTreeDebugger {
         for (DataSchemaNode node : dataNodeContainer.getChildNodes()) {
             if (node instanceof DataNodeContainer) {
                 getContainer(node, level + 1);
-            } else if (node instanceof LeafSchemaNode || node instanceof LeafListSchemaNode) {
+            } else {
                 getDataNode(node, level + 1);
             }
         }
@@ -31,6 +31,18 @@ public class DataTreeDebugger {
         } else if (childNode instanceof LeafListSchemaNode) {
             LeafListSchemaNode leafList = (LeafListSchemaNode) childNode;
             setTypeInfo(leafList.getType(), level + 1);
+        } else if (childNode instanceof AnydataSchemaNode) {
+            Main.printIndent(level + 2);
+            System.out.println("type: anydata");
+        } else if (childNode instanceof AnyxmlSchemaNode) {
+            Main.printIndent(level + 2);
+            System.out.println("type: anyxml");
+        } else if (childNode instanceof ChoiceSchemaNode) {
+            Main.printIndent(level + 2);
+            System.out.println("type: choice");
+        } else {
+            Main.printIndent(level + 2);
+            System.out.println("type: " + childNode.toString());
         }
     }
 

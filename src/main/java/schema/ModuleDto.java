@@ -12,6 +12,6 @@ public class ModuleDto {
     private String nameSpace;
     private String revision;
     private Optional<DataTreeDto> dataTree;
-    private Optional<Map<String, RpcDto>> rpcDtos;
+    private Optional<Map<String, RpcDto>> rpcs;
     private Optional<Map<String, ContainerDto>> notifications;
 }

@@ -13,7 +13,6 @@ public class LeafDto {
     private String type;
     private boolean config = true;
     private boolean isList = false;
-    private String status;
     private Optional<String> defaultValue;
 
     private Optional<List<BitsType>> bits; // type bits

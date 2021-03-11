@@ -1,8 +1,11 @@
 package schema;
 
-import java.util.List;
+import lombok.Data;
 
+import java.util.Optional;
+
+@Data
 public class RpcDto {
-    private List<ContainerDto> input;
-    private List<ContainerDto> output;
+    private Optional<ContainerDto> input;
+    private Optional<ContainerDto> output;
 }

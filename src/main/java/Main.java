@@ -12,11 +12,13 @@ import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
 import org.opendaylight.yangtools.yang.parser.stmt.reactor.EffectiveSchemaContext;
 import schema.ModuleDto;
+import schema.RpcDto;
 
 import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Map;
 
 public class Main {
     public static final FileFilter YANG_FILE_FILTER =
@@ -33,13 +35,14 @@ public class Main {
 
         schemaContext = reactor.buildEffective();
 
-        Module module = schemaContext.findModules("ietf-netconf-monitoring").iterator().next();
+        Module module = schemaContext.findModules("ietf-netconf").iterator().next();
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new Jdk8Module());
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         ModuleDto moduleDto = yangToJson.convertToDto(schemaContext, module);
         String json = mapper.writeValueAsString(moduleDto);
         System.out.println(json);
+
 //        System.out.println(module.getName());
 //        System.out.println("getRpcs:");
 //        for (RpcDefinition rpc : module.getRpcs()) {
@@ -61,8 +64,7 @@ public class Main {
         for (DataSchemaNode childNode : rpc.getInput().getChildNodes()) {
             if (childNode instanceof DataNodeContainer) {
                 DataTreeDebugger.getContainer(childNode, level + 1);
-            } else if (childNode instanceof LeafSchemaNode
-                    || childNode instanceof LeafListSchemaNode) {
+            } else {
                 DataTreeDebugger.getDataNode(childNode, level + 1);
             }
         }
@@ -71,8 +73,7 @@ public class Main {
         for (DataSchemaNode childNode : rpc.getOutput().getChildNodes()) {
             if (childNode instanceof DataNodeContainer) {
                 DataTreeDebugger.getContainer(childNode, level + 1);
-            } else if (childNode instanceof LeafSchemaNode
-                    || childNode instanceof LeafListSchemaNode) {
+            } else {
                 DataTreeDebugger.getDataNode(childNode, level + 1);
             }
         }

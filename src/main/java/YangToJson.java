@@ -42,8 +42,46 @@ public class YangToJson {
         if (module.getRevision().isPresent()) {
             moduleDto.setRevision(module.getRevision().get().toString());
         }
-        moduleDto.setDataTree(Optional.of(getModuleDataTree(module.getChildNodes())));
+
+        DataTreeDto dataTreeDto = getModuleDataTree(module.getChildNodes());
+        if (!dataTreeDto.isEmpty()) {
+            moduleDto.setDataTree(Optional.of(dataTreeDto));
+        }
+
+        Map<String, RpcDto> rpcTree = getRpcTree(module.getRpcs());
+        if (!rpcTree.isEmpty()) {
+            moduleDto.setRpcs(Optional.of(rpcTree));
+        }
+
+        Map<String, ContainerDto> notificationTree = getNotificationTree();
+        if (!notificationTree.isEmpty()) {
+            moduleDto.setNotifications(Optional.of(notificationTree));
+        }
         return moduleDto;
+    }
+
+    private Map<String, RpcDto> getRpcTree(Collection<? extends RpcDefinition> rpcs) {
+        Map<String, RpcDto> rpcTree = new HashMap<>();
+        for (RpcDefinition rpc : rpcs) {
+            RpcDto rpcDto = new RpcDto();
+            ContainerDto input = getContainer(rpc.getInput());
+            ContainerDto output = getContainer(rpc.getOutput());
+
+            if (!input.isEmpty()) {
+                rpcDto.setInput(Optional.of(input));
+            }
+            if (!output.isEmpty()) {
+                rpcDto.setOutput(Optional.of(output));
+            }
+            rpcTree.put(rpc.getQName().getLocalName(), rpcDto);
+        }
+        return rpcTree;
+    }
+
+
+    private Map<String, ContainerDto> getNotificationTree() {
+        Map<String, ContainerDto> notificationTree = new HashMap<>();
+        return notificationTree;
     }
 
     private DataTreeDto getModuleDataTree(Collection<? extends DataSchemaNode> childNodes) {
@@ -72,7 +110,6 @@ public class YangToJson {
         Map<String, LeafDto> leaves = new HashMap<>();
         Map<String, ContainerDto> containers = new HashMap<>();
 
-        containerDto.setStatus(childNode.getStatus().toString());
         if (childNode.effectiveConfig().isPresent()) {
             containerDto.setConfig(childNode.effectiveConfig().get());
         }
@@ -122,7 +159,6 @@ public class YangToJson {
 
     private LeafDto getDataNode(DataSchemaNode childNode) {
         LeafDto leafDto = new LeafDto();
-        leafDto.setStatus(childNode.getStatus().toString());
         if (childNode.effectiveConfig().isPresent()) {
             leafDto.setConfig(childNode.effectiveConfig().get());
         }
@@ -239,7 +275,8 @@ public class YangToJson {
             leafDto.setBits(Optional.of(bitsTypes));
 
         } else if (!(typeDefinition instanceof RangeRestrictedTypeDefinition
-                || typeDefinition instanceof BooleanTypeDefinition)) {
+                || typeDefinition instanceof BooleanTypeDefinition
+                || typeDefinition instanceof EmptyTypeDefinition)) {
             System.out.println("Unknow type: " + typeDefinition.getQName().getLocalName());
         }
     }
