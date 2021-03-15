@@ -303,17 +303,40 @@ public class YangToJson {
         TypeProperty typeProperty = new TypeProperty();
 
         String typeName = null;
+        // base type
         String baseName = nodeType.getQName().getLocalName();
+
+        List<String> basePatterns = new ArrayList<>();
+        Range baseRange = null;
+
         TypeDefinition<? extends TypeDefinition<?>> tmpType = nodeType;
         while (!baseName.equals(typeName)) {
             typeName = baseName;
             if (tmpType.getBaseType() != null) {
                 baseName = tmpType.getBaseType().getQName().getLocalName();
                 tmpType = tmpType.getBaseType();
+                if (tmpType instanceof StringTypeDefinition) {
+                    StringTypeDefinition stringType = (StringTypeDefinition) tmpType;
+                    List<String> patterns = new ArrayList<>();
+                    for (PatternConstraint patternConstraint : stringType.getPatternConstraints()) {
+                        patterns.add(patternConstraint.getRegularExpressionString());
+                    }
+                    basePatterns.addAll(patterns);
+                } else if (tmpType instanceof RangeRestrictedTypeDefinition) {
+                    RangeRestrictedTypeDefinition rangeType = (RangeRestrictedTypeDefinition) tmpType;
+                    RangeConstraint rangeConstraint = (RangeConstraint) rangeType.getRangeConstraint().get();
+                    Range range = rangeConstraint.getAllowedRanges().span();
+                    if (baseRange == null
+                            || baseRange.lowerEndpoint().compareTo(range.lowerEndpoint()) < 0
+                            || baseRange.upperEndpoint().compareTo(range.upperEndpoint()) > 0) {
+                        baseRange = range;
+                    }
+                }
             }
         }
         typeProperty.setName(typeName);
 
+        // current type
         if (nodeType.getDescription().isPresent()) {
             typeProperty.setDescription(nodeType.getDescription());
         }
@@ -325,12 +348,15 @@ public class YangToJson {
         }
 
         if (nodeType instanceof RangeRestrictedTypeDefinition) {
-            RangeRestrictedTypeDefinition rangeRestrictedType = (RangeRestrictedTypeDefinition) nodeType;
-            Optional<RangeConstraint> rangeConstraint = rangeRestrictedType.getRangeConstraint();
-            if (rangeConstraint.isPresent()) {
-                Range range = rangeConstraint.get().getAllowedRanges().span();
-                typeProperty.setRange(Optional.of(range.lowerEndpoint() + "~" + range.upperEndpoint()));
+            RangeRestrictedTypeDefinition rangeType = (RangeRestrictedTypeDefinition) nodeType;
+            RangeConstraint rangeConstraint = (RangeConstraint) rangeType.getRangeConstraint().get();
+            Range range = rangeConstraint.getAllowedRanges().span();
+            if (baseRange == null
+                    || baseRange.lowerEndpoint().compareTo(range.lowerEndpoint()) < 0
+                    || baseRange.upperEndpoint().compareTo(range.upperEndpoint()) > 0) {
+                baseRange = range;
             }
+            typeProperty.setRange(Optional.of(baseRange.lowerEndpoint() + "~" + baseRange.upperEndpoint()));
         }
 
         if (nodeType instanceof LengthRestrictedTypeDefinition) {
@@ -367,12 +393,11 @@ public class YangToJson {
 
         } else if (nodeType instanceof StringTypeDefinition) {
             StringTypeDefinition stringType = (StringTypeDefinition) nodeType;
-            List<String> patterns = new ArrayList<>();
             for (PatternConstraint patternConstraint : stringType.getPatternConstraints()) {
-                patterns.add(patternConstraint.getRegularExpressionString());
+                basePatterns.add(patternConstraint.getRegularExpressionString());
             }
-            if (patterns.size() > 0) {
-                typeProperty.setPattern(Optional.of(patterns));
+            if (basePatterns.size() > 0) {
+                typeProperty.setPattern(Optional.of(basePatterns));
             }
         } else if (nodeType instanceof BitsTypeDefinition) {
             BitsTypeDefinition bitsType = (BitsTypeDefinition) nodeType;
