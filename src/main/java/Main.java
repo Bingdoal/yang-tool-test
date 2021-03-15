@@ -38,7 +38,8 @@ public class Main {
         yangToJson.convertToDto(schemaContext);
 
 
-//        Module module = schemaContext.findModules("ietf-netconf").iterator().next();
+//        Module module = schemaContext.findModules("ietf-netconf-acm").iterator().next();
+//        ModuleDto moduleDto = yangToJson.convertToDto(schemaContext,module);
 //        ObjectMapper mapper = new ObjectMapper();
 //        mapper.registerModule(new Jdk8Module());
 //        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);

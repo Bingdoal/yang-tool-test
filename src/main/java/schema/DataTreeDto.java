@@ -7,13 +7,17 @@ import java.util.Map;
 import java.util.Optional;
 
 @Data
-@JsonIgnoreProperties(value = { "empty" })
+@JsonIgnoreProperties(value = {"empty"})
 public class DataTreeDto {
-    private Optional<Map<String, LeafDto>> leaves;
-    private Optional<Map<String, ContainerDto>> containers;
+    private Optional<Map<String, LeafDto>> leaf;
+    private Optional<Map<String, ContainerDto>> container;
+    private Optional<Map<String, LeafDto>> leafList;
+    private Optional<Map<String, ContainerDto>> list;
 
     public boolean isEmpty() {
-        return (leaves == null || leaves.isEmpty())
-                && (containers == null || containers.isEmpty());
+        return (leaf == null || leaf.isEmpty())
+                && (leafList == null || leafList.isEmpty())
+                && (container == null || container.isEmpty())
+                && (list == null || list.isEmpty());
     }
 }

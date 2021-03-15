@@ -13,6 +13,7 @@ import org.opendaylight.yangtools.yang.parser.rfc7950.repo.YangStatementStreamSo
 import org.opendaylight.yangtools.yang.parser.stmt.reactor.EffectiveSchemaContext;
 import schema.*;
 import schema.type.BitsType;
+import schema.type.TypeProperty;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -86,19 +87,19 @@ public class YangToJson {
             moduleDto.setRevision(module.getRevision().get().toString());
         }
 
-        DataTreeDto dataTreeDto = getModuleDataTree(module.getChildNodes());
+        DataTreeDto dataTreeDto = getDataTree(module.getChildNodes(), true);
         if (!dataTreeDto.isEmpty()) {
             moduleDto.setDataTree(Optional.of(dataTreeDto));
         }
 
         Map<String, RpcDto> rpcTree = getRpcTree(module.getRpcs());
         if (!rpcTree.isEmpty()) {
-            moduleDto.setRpcs(Optional.of(rpcTree));
+            moduleDto.setRpc(Optional.of(rpcTree));
         }
 
         Map<String, ContainerDto> notificationTree = getNotificationTree(module.getNotifications());
         if (!notificationTree.isEmpty()) {
-            moduleDto.setNotifications(Optional.of(notificationTree));
+            moduleDto.setNotification(Optional.of(notificationTree));
         }
         return moduleDto;
     }
@@ -131,22 +132,53 @@ public class YangToJson {
     }
 
 
-    private DataTreeDto getModuleDataTree(Collection<? extends DataSchemaNode> childNodes) {
+    private DataTreeDto getDataTree(Collection<? extends DataSchemaNode> childNodes, boolean defaultConfig) {
         DataTreeDto dataTreeDto = new DataTreeDto();
         Map<String, LeafDto> leaves = new HashMap<>();
         Map<String, ContainerDto> containers = new HashMap<>();
+        Map<String, LeafDto> leafList = new HashMap<>();
+        Map<String, ContainerDto> containerList = new HashMap<>();
         for (DataSchemaNode node : childNodes) {
             if (node.getStatus() == Status.DEPRECATED) {
                 continue;
             }
-            boolean config = node.effectiveConfig().isPresent() ? node.effectiveConfig().get() : true;
-            putNodeInLeavesOrContainers(leaves, containers, node, config);
+            boolean config = node.effectiveConfig().isPresent() ? node.effectiveConfig().get() : defaultConfig;
+
+            String nodeName = node.getQName().getLocalName();
+            if (node.isAugmenting()) {
+                String moduleName = schemaContext.findModules(node.getQName().getNamespace())
+                        .iterator().next().getName();
+                nodeName = moduleName + ":" + nodeName;
+            }
+
+            if (node instanceof DataNodeContainer) {
+                ContainerDto tmpContainer = getContainer((DataNodeContainer) node, config);
+                if (tmpContainer.isArray()) {
+                    containerList.put(nodeName, tmpContainer);
+                } else {
+                    containers.put(nodeName, tmpContainer);
+                }
+            } else if (isLeafLikeNode(node)) {
+                LeafDto tmpLeaf = getDataNode(node, config);
+                if (tmpLeaf.isArray()) {
+                    leafList.put(nodeName, tmpLeaf);
+                } else {
+                    leaves.put(nodeName, tmpLeaf);
+                }
+            }
+
         }
         if (!leaves.isEmpty()) {
-            dataTreeDto.setLeaves(Optional.of(leaves));
+            dataTreeDto.setLeaf(Optional.of(leaves));
         }
         if (!containers.isEmpty()) {
-            dataTreeDto.setContainers(Optional.of(containers));
+            dataTreeDto.setContainer(Optional.of(containers));
+        }
+        if (!leafList.isEmpty()) {
+            dataTreeDto.setLeafList(Optional.of(leafList));
+        }
+        if (!containerList.isEmpty()) {
+            dataTreeDto.setList(Optional.of(containerList));
         }
         return dataTreeDto;
     }
@@ -154,8 +186,6 @@ public class YangToJson {
     private ContainerDto getContainer(DataNodeContainer dataNodeContainer, boolean defaultConfig) {
 
         ContainerDto containerDto = new ContainerDto();
-        Map<String, LeafDto> leaves = new HashMap<>();
-        Map<String, ContainerDto> containers = new HashMap<>();
         containerDto.setConfig(defaultConfig);
 
         if (dataNodeContainer instanceof DataSchemaNode) {
@@ -165,41 +195,28 @@ public class YangToJson {
             }
             if (childNode instanceof ListSchemaNode) {
                 ListSchemaNode listSchemaNode = (ListSchemaNode) childNode;
-                containerDto.setList(true);
+                containerDto.setArray(true);
                 if (listSchemaNode.getKeyDefinition().size() > 0) {
                     containerDto.setKey(Optional.of(listSchemaNode.getKeyDefinition().get(0).getLocalName()));
                 }
             }
         }
 
-        for (DataSchemaNode node : dataNodeContainer.getChildNodes()) {
-            if (node.getStatus() == Status.DEPRECATED) {
-                continue;
-            }
-            boolean config = node.effectiveConfig().isPresent() ? node.effectiveConfig().get() : true;
-            putNodeInLeavesOrContainers(leaves, containers, node, config);
+        DataTreeDto dataTreeDto = getDataTree(dataNodeContainer.getChildNodes(), defaultConfig);
+
+        if (dataTreeDto.getLeaf() != null && dataTreeDto.getLeaf().isPresent()) {
+            containerDto.setLeaf(dataTreeDto.getLeaf());
         }
-        if (!leaves.isEmpty()) {
-            containerDto.setLeaves(Optional.of(leaves));
+        if (dataTreeDto.getContainer() != null && dataTreeDto.getContainer().isPresent()) {
+            containerDto.setContainer(dataTreeDto.getContainer());
         }
-        if (!containers.isEmpty()) {
-            containerDto.setContainers(Optional.of(containers));
+        if (dataTreeDto.getLeafList() != null && dataTreeDto.getLeafList().isPresent()) {
+            containerDto.setLeafList(dataTreeDto.getLeafList());
+        }
+        if (dataTreeDto.getList() != null && dataTreeDto.getList().isPresent()) {
+            containerDto.setList(dataTreeDto.getList());
         }
         return containerDto;
-    }
-
-    private void putNodeInLeavesOrContainers(Map<String, LeafDto> leaves, Map<String, ContainerDto> containers, DataSchemaNode node, boolean defaultConfig) {
-        String nodeName = node.getQName().getLocalName();
-        if (node.isAugmenting()) {
-            String moduleName = schemaContext.findModules(node.getQName().getNamespace())
-                    .iterator().next().getName();
-            nodeName = moduleName + ":" + nodeName;
-        }
-        if (node instanceof DataNodeContainer) {
-            containers.put(nodeName, getContainer((DataNodeContainer) node, defaultConfig));
-        } else if (isLeafLikeNode(node)) {
-            leaves.put(nodeName, getDataNode(node, defaultConfig));
-        }
     }
 
     private boolean isLeafLikeNode(DataSchemaNode node) {
@@ -216,67 +233,67 @@ public class YangToJson {
         if (childNode.effectiveConfig().isPresent()) {
             leafDto.setConfig(childNode.effectiveConfig().get());
         }
-        if (childNode instanceof LeafSchemaNode) {
-            LeafSchemaNode leaf = (LeafSchemaNode) childNode;
-            setTypeInfo(leaf.getType(), leafDto);
-        } else if (childNode instanceof LeafListSchemaNode) {
-            LeafListSchemaNode leafList = (LeafListSchemaNode) childNode;
-            leafDto.setList(true);
-            setTypeInfo(leafList.getType(), leafDto);
+        if (childNode instanceof MandatoryAware) {
+            MandatoryAware mandatoryAware = (MandatoryAware) childNode;
+            leafDto.setMandatory(mandatoryAware.isMandatory());
+        }
+
+        if (childNode instanceof TypedDataSchemaNode) {
+            TypedDataSchemaNode typedData = (TypedDataSchemaNode) childNode;
+            TypeProperty type = getTypeInfo(typedData.getType());
+            leafDto.setType(type.getName());
+            leafDto.setTypeProperty(type);
+        }
+
+        if (childNode instanceof LeafListSchemaNode) {
+            leafDto.setArray(true);
         } else if (childNode instanceof AnydataSchemaNode) {
             AnydataSchemaNode anydata = (AnydataSchemaNode) childNode;
             leafDto.setType("anydata");
+            leafDto.setTypeProperty(new TypeProperty("anydata"));
         } else if (childNode instanceof AnyxmlSchemaNode) {
             AnyxmlSchemaNode anyxml = (AnyxmlSchemaNode) childNode;
             leafDto.setType("anyxml");
+            leafDto.setTypeProperty(new TypeProperty("anyxml"));
         } else if (childNode instanceof ChoiceSchemaNode) {
-            setChoiceInfo((ChoiceSchemaNode) childNode, leafDto);
-        } else {
+            TypeProperty type = getChoiceTypeInfo((ChoiceSchemaNode) childNode);
+            leafDto.setType(type.getName());
+            leafDto.setTypeProperty(type);
+        } else if (!(childNode instanceof LeafSchemaNode)) {
             System.out.println("Unknow Node: " + childNode.getQName().getLocalName());
         }
         return leafDto;
     }
 
-    private void setChoiceInfo(ChoiceSchemaNode choiceNode, LeafDto leafDto) {
-        leafDto.setType("choice");
+    private TypeProperty getChoiceTypeInfo(ChoiceSchemaNode choiceNode) {
+        TypeProperty typeProperty = new TypeProperty();
+        typeProperty.setName("choice");
         if (choiceNode.getDefaultCase().isPresent()) {
-            leafDto.setDefaultCase(Optional.of(choiceNode.getDefaultCase().get().getQName().getLocalName()));
+            typeProperty.setDefaultCase(Optional.of(choiceNode.getDefaultCase().get().getQName().getLocalName()));
         }
 
-        Map<String, CaseDto> cases = new HashMap<>();
+        Map<String, DataTreeDto> cases = new HashMap<>();
         for (CaseSchemaNode caseNode : choiceNode.getCases()) {
-            CaseDto caseDto = new CaseDto();
-            Map<String, LeafDto> leaves = new HashMap<>();
-            Map<String, ContainerDto> containers = new HashMap<>();
-
-            for (DataSchemaNode node : caseNode.getChildNodes()) {
-                if (node.getStatus() == Status.DEPRECATED) {
-                    continue;
-                }
-                putNodeInLeavesOrContainers(leaves, containers, node, true);
-            }
-
-            if (!leaves.isEmpty()) {
-                caseDto.setLeaves(Optional.of(leaves));
-            }
-            if (!containers.isEmpty()) {
-                caseDto.setContainers(Optional.of(containers));
-            }
-            cases.put(caseNode.getQName().getLocalName(), caseDto);
+            cases.put(caseNode.getQName().getLocalName(), getDataTree(caseNode.getChildNodes(), true));
         }
 
-        leafDto.setCases(Optional.of(cases));
+        typeProperty.setCases(Optional.of(cases));
+        return typeProperty;
     }
 
-    private void setTypeInfo(TypeDefinition<? extends TypeDefinition<?>> nodeType, LeafDto leafDto) {
+    private TypeProperty getTypeInfo(TypeDefinition<? extends TypeDefinition<?>> nodeType) {
+        TypeProperty typeProperty = new TypeProperty();
         TypeDefinition<? extends TypeDefinition<?>> typeDefinition = nodeType;
+        String typeName = "";
         if (nodeType.getBaseType() != null) {
-            leafDto.setType(nodeType.getBaseType().getQName().getLocalName());
+            typeName = nodeType.getBaseType().getQName().getLocalName();
         } else {
-            leafDto.setType(nodeType.getQName().getLocalName());
+            typeName = nodeType.getQName().getLocalName();
         }
+        typeProperty.setName(typeName);
+
         if (nodeType.getDefaultValue().isPresent()) {
-            leafDto.setDefaultValue((Optional<String>) (nodeType.getDefaultValue()));
+            typeProperty.setDefaultValue((Optional<String>) (nodeType.getDefaultValue()));
         }
 
         if (typeDefinition instanceof RangeRestrictedTypeDefinition) {
@@ -284,7 +301,7 @@ public class YangToJson {
             Optional<RangeConstraint> rangeConstraint = rangeRestrictedType.getRangeConstraint();
             if (rangeConstraint.isPresent()) {
                 Range range = rangeConstraint.get().getAllowedRanges().span();
-                leafDto.setRange(Optional.of(range.lowerEndpoint() + "~" + range.upperEndpoint()));
+                typeProperty.setRange(Optional.of(range.lowerEndpoint() + "~" + range.upperEndpoint()));
             }
         }
 
@@ -294,28 +311,34 @@ public class YangToJson {
             for (EnumTypeDefinition.EnumPair value : enumType.getValues()) {
                 options.add(value.getValue() + ":" + value.getName());
             }
-            leafDto.setOptions(Optional.of(options));
+            typeProperty.setOptions(Optional.of(options));
 
         } else if (typeDefinition instanceof IdentityrefTypeDefinition) {
             IdentityrefTypeDefinition identityrefType = (IdentityrefTypeDefinition) typeDefinition;
-            leafDto.setOptions(Optional.of(getIdentityOptions(identityrefType.getIdentities())));
+            typeProperty.setOptions(Optional.of(getIdentityOptions(identityrefType.getIdentities())));
 
         } else if (typeDefinition instanceof LeafrefTypeDefinition) {
             LeafrefTypeDefinition leafrefType = (LeafrefTypeDefinition) typeDefinition;
-            leafDto.setPath(Optional.of(leafrefType.getPathStatement().getOriginalString()));
+            typeProperty.setPath(Optional.of(leafrefType.getPathStatement().getOriginalString()));
 
         } else if (typeDefinition instanceof DecimalTypeDefinition) {
             DecimalTypeDefinition decimalType = (DecimalTypeDefinition) typeDefinition;
-            leafDto.setFractionDigits(Optional.of(decimalType.getFractionDigits()));
+            typeProperty.setFractionDigits(Optional.of(decimalType.getFractionDigits()));
 
         } else if (typeDefinition instanceof StringTypeDefinition) {
             StringTypeDefinition stringType = (StringTypeDefinition) typeDefinition;
+            if (stringType.getLengthConstraint().isPresent()) {
+                LengthConstraint lengthConstraint = stringType.getLengthConstraint().get();
+                Range<Integer> span = lengthConstraint.getAllowedRanges().span();
+                String lengthRange = span.lowerEndpoint() + "~" + span.upperEndpoint();
+                typeProperty.setLength(Optional.of(lengthRange));
+            }
             List<String> patterns = new ArrayList<>();
             for (PatternConstraint patternConstraint : stringType.getPatternConstraints()) {
                 patterns.add(patternConstraint.getRegularExpressionString());
             }
             if (patterns.size() > 0) {
-                leafDto.setPattern(Optional.of(patterns));
+                typeProperty.setPattern(Optional.of(patterns));
             }
         } else if (typeDefinition instanceof BitsTypeDefinition) {
             BitsTypeDefinition bitsType = (BitsTypeDefinition) typeDefinition;
@@ -326,13 +349,22 @@ public class YangToJson {
                 bitT.setPosition(Integer.parseInt(bit.getPosition().toString()));
                 bitT.setDescription(bit.getDescription());
             }
-            leafDto.setBits(Optional.of(bitsTypes));
+            typeProperty.setBits(Optional.of(bitsTypes));
 
+        } else if (typeDefinition instanceof UnionTypeDefinition) {
+            UnionTypeDefinition unionType = (UnionTypeDefinition) typeDefinition;
+            List<TypeProperty> types = new ArrayList<>();
+            for (TypeDefinition<?> type : unionType.getTypes()) {
+                TypeProperty tmp = getTypeInfo(type);
+                types.add(tmp);
+            }
+            typeProperty.setUnionTypes(Optional.of(types));
         } else if (!(typeDefinition instanceof RangeRestrictedTypeDefinition
                 || typeDefinition instanceof BooleanTypeDefinition
                 || typeDefinition instanceof EmptyTypeDefinition)) {
             System.out.println("Unknow type: " + typeDefinition.getQName().getLocalName());
         }
+        return typeProperty;
     }
 
     private List<String> getIdentityOptions(Collection<? extends IdentitySchemaNode> identities) {

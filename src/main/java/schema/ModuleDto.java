@@ -7,16 +7,16 @@ import java.util.Map;
 import java.util.Optional;
 
 @Data
-@JsonIgnoreProperties(value = { "empty" })
+@JsonIgnoreProperties(value = {"empty"})
 public class ModuleDto {
     private String name;
     private String namespace;
     private String revision;
     private Optional<DataTreeDto> dataTree;
-    private Optional<Map<String, RpcDto>> rpcs;
-    private Optional<Map<String, ContainerDto>> notifications;
+    private Optional<Map<String, RpcDto>> rpc;
+    private Optional<Map<String, ContainerDto>> notification;
 
     public boolean isEmpty() {
-        return dataTree == null && rpcs == null && notifications == null;
+        return dataTree == null && rpc == null && notification == null;
     }
 }
