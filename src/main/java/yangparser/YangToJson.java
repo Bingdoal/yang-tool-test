@@ -308,6 +308,7 @@ public class YangToJson {
 
         List<String> basePatterns = new ArrayList<>();
         Range baseRange = null;
+        Range baseLength = null;
 
         TypeDefinition<? extends TypeDefinition<?>> tmpType = nodeType;
         while (!baseName.equals(typeName)) {
@@ -322,7 +323,8 @@ public class YangToJson {
                         patterns.add(patternConstraint.getRegularExpressionString());
                     }
                     basePatterns.addAll(patterns);
-                } else if (tmpType instanceof RangeRestrictedTypeDefinition) {
+                }
+                if (tmpType instanceof RangeRestrictedTypeDefinition) {
                     RangeRestrictedTypeDefinition rangeType = (RangeRestrictedTypeDefinition) tmpType;
                     RangeConstraint rangeConstraint = (RangeConstraint) rangeType.getRangeConstraint().get();
                     Range range = rangeConstraint.getAllowedRanges().span();
@@ -330,6 +332,19 @@ public class YangToJson {
                             || baseRange.lowerEndpoint().compareTo(range.lowerEndpoint()) < 0
                             || baseRange.upperEndpoint().compareTo(range.upperEndpoint()) > 0) {
                         baseRange = range;
+                    }
+                }
+
+                if (nodeType instanceof LengthRestrictedTypeDefinition) {
+                    LengthRestrictedTypeDefinition lengthType = (LengthRestrictedTypeDefinition) tmpType;
+                    if (lengthType.getLengthConstraint().isPresent()) {
+                        LengthConstraint lengthConstraint = (LengthConstraint) lengthType.getLengthConstraint().get();
+                        Range range = lengthConstraint.getAllowedRanges().span();
+                        if (baseLength == null
+                                || baseLength.lowerEndpoint().compareTo(range.lowerEndpoint()) < 0
+                                || baseLength.upperEndpoint().compareTo(range.upperEndpoint()) > 0) {
+                            baseLength = range;
+                        }
                     }
                 }
             }
@@ -360,12 +375,18 @@ public class YangToJson {
         }
 
         if (nodeType instanceof LengthRestrictedTypeDefinition) {
-            LengthRestrictedTypeDefinition lengthRestrictedType =
-                    (LengthRestrictedTypeDefinition) nodeType;
-            if (lengthRestrictedType.getLengthConstraint().isPresent()) {
-                LengthConstraint lengthConstraint = (LengthConstraint) lengthRestrictedType.getLengthConstraint().get();
-                Range<Integer> span = lengthConstraint.getAllowedRanges().span();
-                String lengthRange = span.lowerEndpoint() + "~" + span.upperEndpoint();
+            LengthRestrictedTypeDefinition lengthType = (LengthRestrictedTypeDefinition) tmpType;
+            if (lengthType.getLengthConstraint().isPresent()) {
+                LengthConstraint lengthConstraint = (LengthConstraint) lengthType.getLengthConstraint().get();
+                Range range = lengthConstraint.getAllowedRanges().span();
+                if (baseLength == null
+                        || baseLength.lowerEndpoint().compareTo(range.lowerEndpoint()) < 0
+                        || baseLength.upperEndpoint().compareTo(range.upperEndpoint()) > 0) {
+                    baseLength = range;
+                }
+            }
+            if (baseLength != null) {
+                String lengthRange = baseLength.lowerEndpoint() + "~" + baseLength.upperEndpoint();
                 typeProperty.setLength(Optional.of(lengthRange));
             }
         }
