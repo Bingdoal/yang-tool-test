@@ -305,6 +305,17 @@ public class YangToJson {
             }
         }
 
+        if (typeDefinition instanceof LengthRestrictedTypeDefinition) {
+            LengthRestrictedTypeDefinition lengthRestrictedType =
+                    (LengthRestrictedTypeDefinition) typeDefinition;
+            if (lengthRestrictedType.getLengthConstraint().isPresent()) {
+                LengthConstraint lengthConstraint = (LengthConstraint) lengthRestrictedType.getLengthConstraint().get();
+                Range<Integer> span = lengthConstraint.getAllowedRanges().span();
+                String lengthRange = span.lowerEndpoint() + "~" + span.upperEndpoint();
+                typeProperty.setLength(Optional.of(lengthRange));
+            }
+        }
+
         if (typeDefinition instanceof EnumTypeDefinition) {
             EnumTypeDefinition enumType = (EnumTypeDefinition) typeDefinition;
             List<String> options = new ArrayList<>();
@@ -319,6 +330,7 @@ public class YangToJson {
 
         } else if (typeDefinition instanceof LeafrefTypeDefinition) {
             LeafrefTypeDefinition leafrefType = (LeafrefTypeDefinition) typeDefinition;
+            typeProperty.setRequireInstance(Optional.of(leafrefType.requireInstance()));
             typeProperty.setPath(Optional.of(leafrefType.getPathStatement().getOriginalString()));
 
         } else if (typeDefinition instanceof DecimalTypeDefinition) {
@@ -327,12 +339,6 @@ public class YangToJson {
 
         } else if (typeDefinition instanceof StringTypeDefinition) {
             StringTypeDefinition stringType = (StringTypeDefinition) typeDefinition;
-            if (stringType.getLengthConstraint().isPresent()) {
-                LengthConstraint lengthConstraint = stringType.getLengthConstraint().get();
-                Range<Integer> span = lengthConstraint.getAllowedRanges().span();
-                String lengthRange = span.lowerEndpoint() + "~" + span.upperEndpoint();
-                typeProperty.setLength(Optional.of(lengthRange));
-            }
             List<String> patterns = new ArrayList<>();
             for (PatternConstraint patternConstraint : stringType.getPatternConstraints()) {
                 patterns.add(patternConstraint.getRegularExpressionString());
@@ -359,6 +365,12 @@ public class YangToJson {
                 types.add(tmp);
             }
             typeProperty.setUnionTypes(Optional.of(types));
+
+        } else if (typeDefinition instanceof InstanceIdentifierTypeDefinition) {
+            InstanceIdentifierTypeDefinition instanceIdentifierType =
+                    (InstanceIdentifierTypeDefinition) typeDefinition;
+            typeProperty.setRequireInstance(Optional.of(instanceIdentifierType.requireInstance()));
+
         } else if (!(typeDefinition instanceof RangeRestrictedTypeDefinition
                 || typeDefinition instanceof BooleanTypeDefinition
                 || typeDefinition instanceof EmptyTypeDefinition)) {
