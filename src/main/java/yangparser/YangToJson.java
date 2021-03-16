@@ -274,7 +274,7 @@ public class YangToJson {
             leafDto.setType("anyxml");
             leafDto.setTypeProperty(new TypeProperty("anyxml"));
         } else if (childNode instanceof ChoiceSchemaNode) {
-            TypeProperty type = getChoiceTypeInfo((ChoiceSchemaNode) childNode);
+            TypeProperty type = getChoiceTypeInfo((ChoiceSchemaNode) childNode, leafDto.isConfig());
             leafDto.setType(type.getName());
             leafDto.setTypeProperty(type);
         } else if (!(childNode instanceof LeafSchemaNode)) {
@@ -283,7 +283,7 @@ public class YangToJson {
         return leafDto;
     }
 
-    private TypeProperty getChoiceTypeInfo(ChoiceSchemaNode choiceNode) {
+    private TypeProperty getChoiceTypeInfo(ChoiceSchemaNode choiceNode, boolean defaultConfig) {
         TypeProperty typeProperty = new TypeProperty();
         typeProperty.setName("choice");
         if (choiceNode.getDefaultCase().isPresent()) {
@@ -292,7 +292,7 @@ public class YangToJson {
 
         Map<String, DataTreeDto> cases = new HashMap<>();
         for (CaseSchemaNode caseNode : choiceNode.getCases()) {
-            cases.put(caseNode.getQName().getLocalName(), getDataTree(caseNode.getChildNodes(), true));
+            cases.put(caseNode.getQName().getLocalName(), getDataTree(caseNode.getChildNodes(), defaultConfig));
         }
 
         typeProperty.setCases(Optional.of(cases));
@@ -393,15 +393,21 @@ public class YangToJson {
 
         if (nodeType instanceof EnumTypeDefinition) {
             EnumTypeDefinition enumType = (EnumTypeDefinition) nodeType;
-            List<String> options = new ArrayList<>();
+            List<EnumType> enumTypes = new ArrayList<>();
             for (EnumTypeDefinition.EnumPair value : enumType.getValues()) {
-                options.add(value.getValue() + ":" + value.getName());
+                EnumType enumT = new EnumType(value.getName(), value.getValue());
+                if (value.getDescription().isPresent()) {
+                    enumT.setDescription(value.getDescription());
+                }
+                enumTypes.add(enumT);
             }
-            typeProperty.setOptions(Optional.of(options));
+            typeProperty.setOptions(Optional.of(enumTypes));
 
         } else if (nodeType instanceof IdentityrefTypeDefinition) {
             IdentityrefTypeDefinition identityrefType = (IdentityrefTypeDefinition) nodeType;
-            typeProperty.setOptions(Optional.of(getIdentityOptions(identityrefType.getIdentities())));
+            IdentitySchemaNode baseIdentity = identityrefType.getIdentities().iterator().next();
+            typeProperty.setIdentities(Optional.of(getIdentityOptions(baseIdentity)));
+            typeProperty.setBase(Optional.of(baseIdentity.getQName().getLocalName()));
 
         } else if (nodeType instanceof LeafrefTypeDefinition) {
             LeafrefTypeDefinition leafrefType = (LeafrefTypeDefinition) nodeType;
@@ -454,19 +460,30 @@ public class YangToJson {
         return typeProperty;
     }
 
-    private List<String> getIdentityOptions(Collection<? extends IdentitySchemaNode> identities) {
-        List<String> options = new ArrayList<>();
-        for (IdentitySchemaNode identity : identities) {
-            options.add(identity.getQName().getLocalName());
-            options.addAll(getDerivedIdentities(identity));
+    private List<IdentityType> getIdentityOptions(IdentitySchemaNode baseIdentity) {
+        List<IdentityType> options = new ArrayList<>();
+        IdentityType identityType = new IdentityType();
+        if (baseIdentity.getDescription().isPresent()) {
+            identityType.setDescription(baseIdentity.getDescription());
         }
+        identityType.setIdentity(baseIdentity.getQName().getLocalName());
+        options.add(identityType);
+        options.addAll(getDerivedIdentities(baseIdentity));
         return options;
     }
 
-    private List<String> getDerivedIdentities(IdentitySchemaNode identity) {
-        List<String> options = new ArrayList<>();
+    private List<IdentityType> getDerivedIdentities(IdentitySchemaNode identity) {
+        List<IdentityType> options = new ArrayList<>();
         for (IdentitySchemaNode derivedIdentity : schemaContext.getDerivedIdentities(identity)) {
-            options.add(derivedIdentity.getQName().getLocalName());
+            Module module = schemaContext.findModules(derivedIdentity.getQName().getNamespace()).iterator().next();
+
+            IdentityType identityType = new IdentityType();
+            if (derivedIdentity.getDescription().isPresent()) {
+                identityType.setDescription(derivedIdentity.getDescription());
+            }
+            identityType.setIdentity(module.getName() + ":" + derivedIdentity.getQName().getLocalName());
+            options.add(identityType);
+
             if (schemaContext.getDerivedIdentities(derivedIdentity).size() > 0) {
                 options.addAll(getDerivedIdentities(derivedIdentity));
             }

@@ -22,16 +22,22 @@ public class TypeProperty {
     private Optional<String> units;
 
     private Optional<String> defaultValue;
+
     private Optional<List<BitsType>> bits; // type bits
     private Optional<String> path; // type leafref
     private Optional<Boolean> requireInstance; // type leafref, instance-identity
+
     private Optional<String> range; // type int, decimal
     private Optional<Integer> fractionDigits; // type decimal
+
     private Optional<List<String>> pattern; // type string
     private Optional<String> length; // type string, binary
-    private Optional<List<String>> options; // type enumeration, identityref
+    private Optional<List<EnumType>> options; // type enumeration
+
+    private Optional<List<IdentityType>> identities; // type identityref
     private Optional<String> base; // type identityref
     private Optional<List<TypeProperty>> unionTypes; // type union
+
     // type choice
     private Optional<Map<String, DataTreeDto>> cases;
     private Optional<String> defaultCase;
