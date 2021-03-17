@@ -15,7 +15,8 @@ public class ModuleDto {
     private Optional<String> description;
     private Optional<DataTreeDto> dataTree;
     private Optional<Map<String, RpcDto>> rpc;
-    private Optional<Map<String, ContainerDto>> notification;
+    @JsonIgnoreProperties(value = {"config", "path"})
+    private Map<String, ContainerDto> notification;
 
     public boolean isEmpty() {
         return dataTree == null && rpc == null && notification == null;

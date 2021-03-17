@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.Range;
-import org.eclipse.sisu.launch.Main;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.YangConstants;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.*;
@@ -15,7 +15,10 @@ import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.parser.rfc7950.repo.YangStatementStreamSource;
 import org.opendaylight.yangtools.yang.parser.stmt.reactor.EffectiveSchemaContext;
 import yangparser.schema.*;
-import yangparser.schema.type.*;
+import yangparser.schema.type.BitsType;
+import yangparser.schema.type.EnumType;
+import yangparser.schema.type.IdentityType;
+import yangparser.schema.type.TypeProperty;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -106,7 +109,7 @@ public class YangToJson {
 
         Map<String, ContainerDto> notificationTree = getNotificationTree(module.getNotifications());
         if (!notificationTree.isEmpty()) {
-            moduleDto.setNotification(Optional.of(notificationTree));
+            moduleDto.setNotification(notificationTree);
         }
         return moduleDto;
     }
@@ -115,6 +118,9 @@ public class YangToJson {
         Map<String, ContainerDto> notificationTree = new HashMap<>();
         for (NotificationDefinition notification : notifications) {
             ContainerDto containerDto = getContainer(notification, true);
+            if (notification.getDescription().isPresent()) {
+                containerDto.setDescription(notification.getDescription());
+            }
             notificationTree.put(notification.getQName().getLocalName(), containerDto);
         }
         return notificationTree;
@@ -130,12 +136,18 @@ public class YangToJson {
 
             ContainerDto input = getContainer(rpc.getInput(), true);
             ContainerDto output = getContainer(rpc.getOutput(), true);
-
+            if (rpc.getInput().getDescription().isPresent()) {
+                input.setDescription(rpc.getInput().getDescription());
+            }
             if (!input.isEmpty()) {
-                rpcDto.setInput(Optional.of(input));
+                rpcDto.setInput(input);
+            }
+
+            if (rpc.getOutput().getDescription().isPresent()) {
+                output.setDescription(rpc.getOutput().getDescription());
             }
             if (!output.isEmpty()) {
-                rpcDto.setOutput(Optional.of(output));
+                rpcDto.setOutput(output);
             }
             rpcTree.put(rpc.getQName().getLocalName(), rpcDto);
         }
@@ -214,6 +226,7 @@ public class YangToJson {
                     containerDto.setKey(Optional.of(listSchemaNode.getKeyDefinition().get(0).getLocalName()));
                 }
             }
+            containerDto.setPath(getPath(childNode));
         }
 
         DataTreeDto dataTreeDto = getDataTree(dataNodeContainer.getChildNodes(), defaultConfig);
@@ -231,6 +244,30 @@ public class YangToJson {
             containerDto.setList(dataTreeDto.getList());
         }
         return containerDto;
+    }
+
+    private String getPath(DataSchemaNode childNode) {
+        System.out.println(childNode.getQName().getLocalName());
+        String path = "";
+        List<QName> pathName = new ArrayList<>();
+        for (QName qName : childNode.getPath().getPathFromRoot()) {
+            pathName.add(qName);
+            path += qName.getLocalName() + "/";
+            Optional<DataSchemaNode> dataSchemaNodeOptional = module.findDataTreeChild(pathName);
+            if (dataSchemaNodeOptional.isPresent()) {
+                DataSchemaNode dataSchemaNode = dataSchemaNodeOptional.get();
+                if (dataSchemaNode instanceof ListSchemaNode) {
+                    ListSchemaNode listSchemaNode = (ListSchemaNode) dataSchemaNode;
+                    if (listSchemaNode.getKeyDefinition().size() > 0) {
+                        path += "{" + listSchemaNode.getKeyDefinition().get(0).getLocalName() + "}/";
+                    }
+                }
+            } else {
+                return null;
+            }
+        }
+        System.out.println(path);
+        return path;
     }
 
     private boolean isLeafLikeNode(DataSchemaNode node) {
@@ -269,14 +306,17 @@ public class YangToJson {
             AnydataSchemaNode anydata = (AnydataSchemaNode) childNode;
             leafDto.setType("anydata");
             leafDto.setTypeProperty(new TypeProperty("anydata"));
+
         } else if (childNode instanceof AnyxmlSchemaNode) {
             AnyxmlSchemaNode anyxml = (AnyxmlSchemaNode) childNode;
             leafDto.setType("anyxml");
             leafDto.setTypeProperty(new TypeProperty("anyxml"));
+
         } else if (childNode instanceof ChoiceSchemaNode) {
             TypeProperty type = getChoiceTypeInfo((ChoiceSchemaNode) childNode, leafDto.isConfig());
             leafDto.setType(type.getName());
             leafDto.setTypeProperty(type);
+
         } else if (!(childNode instanceof LeafSchemaNode)) {
             System.out.println("Unknow Node: " + childNode.getQName().getLocalName());
         }

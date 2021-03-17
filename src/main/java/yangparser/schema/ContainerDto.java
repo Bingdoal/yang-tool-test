@@ -8,6 +8,7 @@ import java.util.*;
 @Data
 @JsonIgnoreProperties(value = {"empty", "array"})
 public class ContainerDto {
+    private String path;
     private boolean isArray = false;
     private boolean config = true;
     private Optional<String> description;
@@ -18,7 +19,8 @@ public class ContainerDto {
     private Optional<Map<String, ContainerDto>> list;
 
     public boolean isEmpty() {
-        return (leaf == null || leaf.isEmpty())
+        return (description == null || description.isEmpty())
+                && (leaf == null || leaf.isEmpty())
                 && (leafList == null || leafList.isEmpty())
                 && (container == null || container.isEmpty())
                 && (list == null || list.isEmpty());
