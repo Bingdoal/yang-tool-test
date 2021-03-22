@@ -272,7 +272,12 @@ public class YangToJson {
         List<QName> pathName = new ArrayList<>();
         for (QName qName : childNode.getPath().getPathFromRoot()) {
             pathName.add(qName);
-            path += qName.getLocalName() + "/";
+            if (!qName.getNamespace().equals(module.getNamespace())) {
+                path += schemaContext.findModules(qName.getNamespace()).iterator().next().getName() + ":"
+                        + qName.getLocalName() + "/";
+            } else {
+                path += qName.getLocalName() + "/";
+            }
             Optional<DataSchemaNode> dataSchemaNodeOptional = module.findDataTreeChild(pathName);
             if (dataSchemaNodeOptional.isPresent()) {
                 DataSchemaNode dataSchemaNode = dataSchemaNodeOptional.get();
