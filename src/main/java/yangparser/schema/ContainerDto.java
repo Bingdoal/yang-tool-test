@@ -2,16 +2,15 @@ package yangparser.schema;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.*;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @JsonIgnoreProperties(value = {"empty", "array"})
-public class ContainerDto {
+public class ContainerDto extends BaseNodeDto {
     private String path;
-    private boolean isArray = false;
-    private boolean config = true;
-    private Optional<String> description;
     private Optional<String> key; // list only
     private Optional<Map<String, LeafDto>> leaf;
     private Optional<Map<String, ContainerDto>> container;

@@ -8,13 +8,10 @@ import java.util.Optional;
 
 @Data
 @JsonIgnoreProperties(value = {"array"})
-public class LeafDto {
+public class LeafDto extends BaseNodeDto {
     private String type;
-    private boolean config = true;
-    private boolean isArray = false;
     private boolean mandatory = false;
     private Optional<String> defaultValue;
-    private Optional<String> description;
 
     private TypeProperty typeProperty;
 }

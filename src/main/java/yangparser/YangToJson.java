@@ -9,6 +9,10 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.YangConstants;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.*;
+import org.opendaylight.yangtools.yang.model.api.meta.DeclaredStatement;
+import org.opendaylight.yangtools.yang.model.api.meta.EffectiveStatement;
+import org.opendaylight.yangtools.yang.model.api.stmt.IfFeatureAwareDeclaredStatement;
+import org.opendaylight.yangtools.yang.model.api.stmt.IfFeatureStatement;
 import org.opendaylight.yangtools.yang.model.api.type.*;
 import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
@@ -30,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.WRITE;
@@ -213,6 +218,21 @@ public class YangToJson {
 
         if (dataNodeContainer instanceof DataSchemaNode) {
             DataSchemaNode childNode = (DataSchemaNode) dataNodeContainer;
+            List<String> mustList = getMustConditions(childNode);
+            if (!mustList.isEmpty()) {
+                containerDto.setMust(Optional.of(mustList));
+            }
+
+            if (childNode.getWhenCondition().isPresent()) {
+                String when = childNode.getWhenCondition().get().toString().replaceAll("[\r\n\\s]", "");
+                containerDto.setWhen(Optional.of(when));
+            }
+
+            List<String> ifFeatures = getIfFeatures(childNode);
+            if (!ifFeatures.isEmpty()) {
+                containerDto.setIfFeature(Optional.of(ifFeatures));
+            }
+
             if (childNode.getDescription().isPresent()) {
                 containerDto.setDescription(childNode.getDescription());
             }
@@ -226,6 +246,7 @@ public class YangToJson {
                     containerDto.setKey(Optional.of(listSchemaNode.getKeyDefinition().get(0).getLocalName()));
                 }
             }
+
             containerDto.setPath(getPath(childNode));
         }
 
@@ -247,7 +268,6 @@ public class YangToJson {
     }
 
     private String getPath(DataSchemaNode childNode) {
-        System.out.println(childNode.getQName().getLocalName());
         String path = "";
         List<QName> pathName = new ArrayList<>();
         for (QName qName : childNode.getPath().getPathFromRoot()) {
@@ -266,7 +286,6 @@ public class YangToJson {
                 return null;
             }
         }
-        System.out.println(path);
         return path;
     }
 
@@ -300,6 +319,21 @@ public class YangToJson {
             leafDto.setTypeProperty(type);
         }
 
+        List<String> mustList = getMustConditions(childNode);
+        if (!mustList.isEmpty()) {
+            leafDto.setMust(Optional.of(mustList));
+        }
+
+        if (childNode.getWhenCondition().isPresent()) {
+            String when = childNode.getWhenCondition().get().toString().replaceAll("[\r\n\\s]", "");
+            leafDto.setWhen(Optional.of(when));
+        }
+
+        List<String> ifFeatures = getIfFeatures(childNode);
+        if (!ifFeatures.isEmpty()) {
+            leafDto.setIfFeature(Optional.of(ifFeatures));
+        }
+
         if (childNode instanceof LeafListSchemaNode) {
             leafDto.setArray(true);
         } else if (childNode instanceof AnydataSchemaNode) {
@@ -321,6 +355,40 @@ public class YangToJson {
             System.out.println("Unknow Node: " + childNode.getQName().getLocalName());
         }
         return leafDto;
+    }
+
+    private List<String> getIfFeatures(DataSchemaNode childNode) {
+        List<String> ifFeatures = new ArrayList<>();
+        if (childNode instanceof EffectiveStatement) {
+            EffectiveStatement effectiveStatement = (EffectiveStatement) childNode;
+            DeclaredStatement declaredStatement = effectiveStatement.getDeclared();
+            if (declaredStatement instanceof IfFeatureAwareDeclaredStatement) {
+                IfFeatureAwareDeclaredStatement ifFeatureAware =
+                        (IfFeatureAwareDeclaredStatement) declaredStatement;
+                if (!ifFeatureAware.getIfFeatures().isEmpty()) {
+                    for (Object ifFeature : ifFeatureAware.getIfFeatures()) {
+                        IfFeatureStatement ifFeatureStatement = (IfFeatureStatement) ifFeature;
+                        for (QName referencedFeature : ifFeatureStatement.getIfFeaturePredicate().getReferencedFeatures()) {
+                            ifFeatures.add(referencedFeature.getLocalName());
+                        }
+                    }
+                }
+            }
+        }
+        return ifFeatures;
+    }
+
+    private List<String> getMustConditions(DataSchemaNode childNode) {
+        List<String> mustList = new ArrayList<>();
+        if (childNode instanceof MustConstraintAware) {
+            MustConstraintAware mustConstraint = (MustConstraintAware) childNode;
+            if (!mustConstraint.getMustConstraints().isEmpty()) {
+                mustList.addAll(mustConstraint.getMustConstraints().stream()
+                        .map((must) -> must.getXpath().toString())
+                        .collect(Collectors.toList()));
+            }
+        }
+        return mustList;
     }
 
     private TypeProperty getChoiceTypeInfo(ChoiceSchemaNode choiceNode, boolean defaultConfig) {
