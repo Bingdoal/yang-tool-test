@@ -40,8 +40,6 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.WRITE;
 
 public class YangToJson {
-    public final FileFilter YANG_FILE_FILTER =
-            file -> file.getName().endsWith(YangConstants.RFC6020_YANG_FILE_EXTENSION) && file.isFile();
     public EffectiveSchemaContext schemaContext;
     private Module module;
     private ObjectMapper mapper;
@@ -50,20 +48,6 @@ public class YangToJson {
         mapper = new ObjectMapper();
         mapper.registerModule(new Jdk8Module());
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    }
-
-    public Collection<YangStatementStreamSource> getSource(String path) throws URISyntaxException, IOException, YangSyntaxErrorException {
-        URL url = this.getClass().getResource(path);
-        if (url == null) {
-            url = this.getClass().getClassLoader().getResource(path);
-        }
-        File sourcesDir = new File(url.toURI());
-        File[] files = sourcesDir.listFiles(YANG_FILE_FILTER);
-        Collection<YangStatementStreamSource> sources = new ArrayList<>(files.length);
-        for (File file : files) {
-            sources.add(YangStatementStreamSource.create(YangTextSchemaSource.forFile(file)));
-        }
-        return sources;
     }
 
     public void convertToDto(EffectiveSchemaContext schemaContext) {
@@ -519,7 +503,7 @@ public class YangToJson {
         } else if (nodeType instanceof IdentityrefTypeDefinition) {
             IdentityrefTypeDefinition identityrefType = (IdentityrefTypeDefinition) nodeType;
             IdentitySchemaNode baseIdentity = identityrefType.getIdentities().iterator().next();
-            typeProperty.setIdentities(Optional.of(getIdentityOptions(baseIdentity)));
+            typeProperty.setIdentities(Optional.of(getDerivedIdentities(baseIdentity)));
             typeProperty.setBase(Optional.of(baseIdentity.getQName().getLocalName()));
 
         } else if (nodeType instanceof LeafrefTypeDefinition) {
@@ -571,18 +555,6 @@ public class YangToJson {
             System.out.println("Unknow type: " + nodeType.getQName().getLocalName());
         }
         return typeProperty;
-    }
-
-    private List<IdentityType> getIdentityOptions(IdentitySchemaNode baseIdentity) {
-        List<IdentityType> options = new ArrayList<>();
-        IdentityType identityType = new IdentityType();
-        if (baseIdentity.getDescription().isPresent()) {
-            identityType.setDescription(baseIdentity.getDescription());
-        }
-        identityType.setIdentity(baseIdentity.getQName().getLocalName());
-        options.add(identityType);
-        options.addAll(getDerivedIdentities(baseIdentity));
-        return options;
     }
 
     private List<IdentityType> getDerivedIdentities(IdentitySchemaNode identity) {

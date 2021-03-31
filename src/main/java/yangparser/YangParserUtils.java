@@ -3,6 +3,7 @@ package yangparser;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import helper.YangUtils;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
 import org.opendaylight.yangtools.yang.model.repo.api.StatementParserMode;
@@ -25,32 +26,9 @@ public class YangParserUtils {
         clear();
         initDirectory();
 
+        EffectiveSchemaContext schemaContext = YangUtils.getSchemaContext(path);
         YangToJson yangToJson = new YangToJson();
-        final Collection<YangStatementStreamSource> sources = yangToJson.getSource(path);
-        final CrossSourceStatementReactor.BuildAction reactor =
-                RFC7950Reactors.defaultReactor().newBuild(StatementParserMode.DEFAULT_MODE)
-                        .addSources(sources);
-
-        EffectiveSchemaContext schemaContext = reactor.buildEffective();
-
         yangToJson.convertToDto(schemaContext);
-    }
-
-    public static String yangToJsonDebug(String path,String moduleName) throws YangSyntaxErrorException, IOException, URISyntaxException, ReactorException {
-        YangToJson yangToJson = new YangToJson();
-        final Collection<YangStatementStreamSource> sources = yangToJson.getSource(path);
-        final CrossSourceStatementReactor.BuildAction reactor =
-                RFC7950Reactors.defaultReactor().newBuild(StatementParserMode.DEFAULT_MODE)
-                        .addSources(sources);
-
-        EffectiveSchemaContext schemaContext = reactor.buildEffective();
-
-        Module module = schemaContext.findModules(moduleName).iterator().next();
-        ModuleDto moduleDto = yangToJson.convertToDto(schemaContext, module);
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new Jdk8Module());
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        return mapper.writeValueAsString(moduleDto);
     }
 
     private static void clear() {
