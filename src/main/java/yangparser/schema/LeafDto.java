@@ -11,6 +11,7 @@ import java.util.Optional;
 public class LeafDto extends BaseNodeDto {
     private String type;
     private boolean mandatory = false;
+    private String xpath;
     private Optional<String> defaultValue;
 
     private TypeProperty typeProperty;

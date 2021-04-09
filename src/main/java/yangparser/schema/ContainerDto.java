@@ -10,7 +10,7 @@ import java.util.*;
 @Data
 @JsonIgnoreProperties(value = {"empty", "array"})
 public class ContainerDto extends BaseNodeDto {
-    private String path;
+    private String xpath;
     private Optional<String> key; // list only
     private Optional<Map<String, LeafDto>> leaf;
     private Optional<Map<String, ContainerDto>> container;

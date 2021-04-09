@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.Range;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.YangConstants;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.*;
 import org.opendaylight.yangtools.yang.model.api.meta.DeclaredStatement;
@@ -14,9 +13,6 @@ import org.opendaylight.yangtools.yang.model.api.meta.EffectiveStatement;
 import org.opendaylight.yangtools.yang.model.api.stmt.IfFeatureAwareDeclaredStatement;
 import org.opendaylight.yangtools.yang.model.api.stmt.IfFeatureStatement;
 import org.opendaylight.yangtools.yang.model.api.type.*;
-import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
-import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
-import org.opendaylight.yangtools.yang.parser.rfc7950.repo.YangStatementStreamSource;
 import org.opendaylight.yangtools.yang.parser.stmt.reactor.EffectiveSchemaContext;
 import yangparser.schema.*;
 import yangparser.schema.type.BitsType;
@@ -24,11 +20,7 @@ import yangparser.schema.type.EnumType;
 import yangparser.schema.type.IdentityType;
 import yangparser.schema.type.TypeProperty;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -231,7 +223,7 @@ public class YangToJson {
                 }
             }
 
-            containerDto.setPath(getPath(childNode));
+            containerDto.setXpath(getXpath(childNode));
         }
 
         DataTreeDto dataTreeDto = getDataTree(dataNodeContainer.getChildNodes(), defaultConfig);
@@ -251,16 +243,16 @@ public class YangToJson {
         return containerDto;
     }
 
-    private String getPath(DataSchemaNode childNode) {
+    private String getXpath(DataSchemaNode childNode) {
         String path = "";
         List<QName> pathName = new ArrayList<>();
         for (QName qName : childNode.getPath().getPathFromRoot()) {
             pathName.add(qName);
             if (!qName.getNamespace().equals(module.getNamespace())) {
-                path += schemaContext.findModules(qName.getNamespace()).iterator().next().getName() + ":"
+                path += "/" + schemaContext.findModules(qName.getNamespace()).iterator().next().getName() + ":"
                         + qName.getLocalName() + "/";
             } else {
-                path += qName.getLocalName() + "/";
+                path += "/" + module.getName() + ":" + qName.getLocalName();
             }
             Optional<DataSchemaNode> dataSchemaNodeOptional = module.findDataTreeChild(pathName);
             if (dataSchemaNodeOptional.isPresent()) {
@@ -268,7 +260,7 @@ public class YangToJson {
                 if (dataSchemaNode instanceof ListSchemaNode) {
                     ListSchemaNode listSchemaNode = (ListSchemaNode) dataSchemaNode;
                     if (listSchemaNode.getKeyDefinition().size() > 0) {
-                        path += "{" + listSchemaNode.getKeyDefinition().get(0).getLocalName() + "}/";
+                        path += "[" + listSchemaNode.getKeyDefinition().get(0).getLocalName() + "]";
                     }
                 }
             } else {
@@ -289,6 +281,7 @@ public class YangToJson {
     private LeafDto getDataNode(DataSchemaNode childNode, boolean defaultConfig) {
         LeafDto leafDto = new LeafDto();
         leafDto.setConfig(defaultConfig);
+        leafDto.setXpath(getXpath(childNode));
         if (childNode.getDescription().isPresent()) {
             leafDto.setDescription(childNode.getDescription());
         }
