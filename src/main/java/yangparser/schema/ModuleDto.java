@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Data
-@JsonIgnoreProperties(value = {"empty"})
+@JsonIgnoreProperties({"empty"})
 public class ModuleDto {
     private String name;
     private String namespace;
@@ -15,7 +15,7 @@ public class ModuleDto {
     private Optional<String> description;
     private Optional<DataTreeDto> dataTree;
     private Optional<Map<String, RpcDto>> rpc;
-    @JsonIgnoreProperties(value = {"config", "path"})
+    @JsonIgnoreProperties({"config", "xpath"})
     private Map<String, ContainerDto> notification;
 
     public boolean isEmpty() {

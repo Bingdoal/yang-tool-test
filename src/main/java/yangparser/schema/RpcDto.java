@@ -8,8 +8,8 @@ import java.util.Optional;
 @Data
 public class RpcDto {
     private Optional<String> description;
-    @JsonIgnoreProperties(value = {"config", "path"})
+    @JsonIgnoreProperties({"config", "xpath"})
     private ContainerDto input;
-    @JsonIgnoreProperties(value = {"config", "path"})
+    @JsonIgnoreProperties({"config", "xpath"})
     private ContainerDto output;
 }

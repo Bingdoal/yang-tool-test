@@ -13,6 +13,7 @@ import org.opendaylight.yangtools.yang.model.api.meta.EffectiveStatement;
 import org.opendaylight.yangtools.yang.model.api.stmt.IfFeatureAwareDeclaredStatement;
 import org.opendaylight.yangtools.yang.model.api.stmt.IfFeatureStatement;
 import org.opendaylight.yangtools.yang.model.api.type.*;
+import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.opendaylight.yangtools.yang.parser.stmt.reactor.EffectiveSchemaContext;
 import yangparser.schema.*;
 import yangparser.schema.type.BitsType;
@@ -146,7 +147,7 @@ public class YangToJson {
             if (node.getStatus() == Status.DEPRECATED) {
                 continue;
             }
-            boolean config = node.effectiveConfig().isPresent() ? node.effectiveConfig().get() : defaultConfig;
+            boolean config = node.isConfiguration() ? node.isConfiguration() : defaultConfig;
 
             String nodeName = node.getQName().getLocalName();
             if (node.isAugmenting()) {
@@ -212,8 +213,8 @@ public class YangToJson {
             if (childNode.getDescription().isPresent()) {
                 containerDto.setDescription(childNode.getDescription());
             }
-            if (childNode.effectiveConfig().isPresent()) {
-                containerDto.setConfig(childNode.effectiveConfig().get());
+            if (childNode.isConfiguration()) {
+                containerDto.setConfig(childNode.isConfiguration());
             }
             if (childNode instanceof ListSchemaNode) {
                 ListSchemaNode listSchemaNode = (ListSchemaNode) childNode;
@@ -285,8 +286,8 @@ public class YangToJson {
         if (childNode.getDescription().isPresent()) {
             leafDto.setDescription(childNode.getDescription());
         }
-        if (childNode.effectiveConfig().isPresent()) {
-            leafDto.setConfig(childNode.effectiveConfig().get());
+        if (childNode.isConfiguration()) {
+            leafDto.setConfig(childNode.isConfiguration());
         }
 
         if (childNode instanceof MandatoryAware) {
@@ -296,7 +297,7 @@ public class YangToJson {
 
         if (childNode instanceof TypedDataSchemaNode) {
             TypedDataSchemaNode typedData = (TypedDataSchemaNode) childNode;
-            TypeProperty type = getTypeInfo(typedData.getType());
+            TypeProperty type = getTypeInfo(childNode, typedData.getType());
             leafDto.setType(type.getName());
             leafDto.setTypeProperty(type);
         }
@@ -389,7 +390,7 @@ public class YangToJson {
         return typeProperty;
     }
 
-    private TypeProperty getTypeInfo(TypeDefinition<? extends TypeDefinition<?>> nodeType) {
+    private TypeProperty getTypeInfo(DataSchemaNode dataSchemaNode, TypeDefinition<? extends TypeDefinition<?>> nodeType) {
         TypeProperty typeProperty = new TypeProperty();
 
         String typeName = null;
@@ -461,7 +462,8 @@ public class YangToJson {
                     || baseRange.upperEndpoint().compareTo(range.upperEndpoint()) > 0) {
                 baseRange = range;
             }
-            typeProperty.setRange(Optional.of(baseRange.lowerEndpoint() + "~" + baseRange.upperEndpoint()));
+            typeProperty.setMin(Optional.of(baseRange.lowerEndpoint().toString()));
+            typeProperty.setMax(Optional.of(baseRange.upperEndpoint().toString()));
         }
 
         if (nodeType instanceof LengthRestrictedTypeDefinition) {
@@ -501,9 +503,11 @@ public class YangToJson {
 
         } else if (nodeType instanceof LeafrefTypeDefinition) {
             LeafrefTypeDefinition leafrefType = (LeafrefTypeDefinition) nodeType;
-            typeProperty.setRequireInstance(Optional.of(leafrefType.requireInstance()));
-            typeProperty.setPath(Optional.of(leafrefType.getPathStatement().getOriginalString()));
+            TypeDefinition refType = SchemaContextUtil.getBaseTypeForLeafRef(leafrefType, schemaContext, dataSchemaNode);
+            typeProperty = getTypeInfo(dataSchemaNode, refType);
 
+            typeProperty.setRequireInstance(Optional.of(leafrefType.requireInstance()));
+            typeProperty.setLeafref(Optional.of(leafrefType.getPathStatement().getOriginalString()));
         } else if (nodeType instanceof DecimalTypeDefinition) {
             DecimalTypeDefinition decimalType = (DecimalTypeDefinition) nodeType;
             typeProperty.setFractionDigits(Optional.of(decimalType.getFractionDigits()));
@@ -531,7 +535,7 @@ public class YangToJson {
             UnionTypeDefinition unionType = (UnionTypeDefinition) nodeType;
             List<TypeProperty> types = new ArrayList<>();
             for (TypeDefinition<?> type : unionType.getTypes()) {
-                TypeProperty tmp = getTypeInfo(type);
+                TypeProperty tmp = getTypeInfo(dataSchemaNode, type);
                 types.add(tmp);
             }
             typeProperty.setUnionTypes(Optional.of(types));

@@ -24,10 +24,11 @@ public class TypeProperty {
     private Optional<String> defaultValue;
 
     private Optional<List<BitsType>> bits; // type bits
-    private Optional<String> path; // type leafref
+    private Optional<String> leafref; // type leafref
     private Optional<Boolean> requireInstance; // type leafref, instance-identity
 
-    private Optional<String> range; // type int, decimal
+    private Optional<String> min; // type int, decimal
+    private Optional<String> max; // type int, decimal
     private Optional<Integer> fractionDigits; // type decimal
 
     private Optional<List<String>> pattern; // type string
@@ -41,4 +42,5 @@ public class TypeProperty {
     // type choice
     private Optional<Map<String, DataTreeDto>> cases;
     private Optional<String> defaultCase;
+
 }

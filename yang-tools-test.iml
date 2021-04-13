@@ -11,55 +11,51 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-model-api:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:util:7.0.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-model-api:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:util:6.0.5" level="project" />
     <orderEntry type="library" name="Maven: tech.pantheon.triemap:triemap:1.2.0" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-xpath-api:7.0.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-xpath-api:6.0.5" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:29.0-jre" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:failureaccess:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava" level="project" />
     <orderEntry type="library" name="Maven: org.checkerframework:checker-qual:2.11.1" level="project" />
     <orderEntry type="library" name="Maven: com.google.errorprone:error_prone_annotations:2.3.4" level="project" />
     <orderEntry type="library" name="Maven: com.google.j2objc:j2objc-annotations:1.3" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-data-api:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:concepts:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-parser-api:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-repo-api:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-common:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-model-util:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-model-spi:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-parser-impl:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-parser-spi:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-parser-reactor:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-parser-rfc7950:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-model-ri:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-parser-antlr:7.0.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-data-api:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:concepts:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-parser-api:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-common:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-model-util:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc7952-model-api:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-parser-impl:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-parser-reactor:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-parser-spi:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-parser-rfc7950:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-parser-antlr:6.0.5" level="project" />
     <orderEntry type="library" name="Maven: org.antlr:antlr4-runtime:4.8-1" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-repo-spi:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:odlext-model-api:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:odlext-parser-support:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:openconfig-model-api:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:openconfig-parser-support:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc6241-model-api:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc6241-parser-support:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc6536-model-api:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc6536-parser-support:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc6643-model-api:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc6643-parser-support:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc7952-model-api:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc7952-parser-support:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc8040-model-api:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc8040-parser-support:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc8528-model-api:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc8528-parser-support:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-xpath-impl:7.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-xpath-antlr:7.0.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:odlext-model-api:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:odlext-parser-support:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:openconfig-model-api:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:openconfig-parser-support:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc6241-model-api:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc6241-parser-support:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc6536-model-api:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc6536-parser-support:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc6643-model-api:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc6643-parser-support:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc7952-parser-support:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc8040-model-api:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc8040-parser-support:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc8528-model-api:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:rfc8528-parser-support:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-xpath-impl:6.0.5" level="project" />
+    <orderEntry type="library" name="Maven: org.opendaylight.yangtools:yang-xpath-antlr:6.0.5" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.26" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-simple:1.6.4" level="project" />
     <orderEntry type="library" name="Maven: org.projectlombok:lombok:1.18.18" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.11.1" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.9.6" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.9.6" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.9.0" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.12.2" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.2" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.12.2" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.12.2" level="project" />
   </component>
 </module>

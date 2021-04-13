@@ -12,5 +12,6 @@ public class BaseNodeDto {
     protected Optional<List<String>> ifFeature;
     protected boolean isArray = false;
     protected boolean config = true;
+    protected String xpath;
     protected Optional<String> description;
 }
