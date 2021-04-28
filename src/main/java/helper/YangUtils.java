@@ -18,21 +18,18 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 public class YangUtils {
     public static EffectiveSchemaContext schemaContext;
 
-    public static EffectiveSchemaContext getSchemaContext(String path) throws ReactorException, YangSyntaxErrorException, IOException, URISyntaxException {
-        FileFilter YANG_FILE_FILTER =
-                file -> file.getName().endsWith(YangConstants.RFC6020_YANG_FILE_EXTENSION) && file.isFile();
-        URL url = YangUtils.class.getResource(path);
-        if (url == null) {
-            url = YangUtils.class.getClass().getClassLoader().getResource(path);
-        }
-        File sourcesDir = new File(url.toURI());
-        File[] files = sourcesDir.listFiles(YANG_FILE_FILTER);
-        Collection<YangStatementStreamSource> sources = new ArrayList<>(files.length);
+    public static EffectiveSchemaContext getSchemaContext() throws ReactorException, YangSyntaxErrorException, IOException, URISyntaxException, ClassNotFoundException {
+
+        List<File> files = new ArrayList<>(Arrays.asList(getYangFiles("/oran")));
+        files.addAll(Arrays.asList(getYangFiles("/basic")));
+        Collection<YangStatementStreamSource> sources = new ArrayList<>(files.size());
         for (File file : files) {
             sources.add(YangStatementStreamSource.create(YangTextSchemaSource.forFile(file)));
         }
@@ -45,11 +42,22 @@ public class YangUtils {
         return schemaContext;
     }
 
+    private static File[] getYangFiles(String path) throws URISyntaxException, ClassNotFoundException {
+        FileFilter YANG_FILE_FILTER =
+                file -> file.getName().endsWith(YangConstants.RFC6020_YANG_FILE_EXTENSION) && file.isFile();
+        URL url = YangUtils.class.getResource(path);
+        if (url == null) {
+            url = YangUtils.class.getClassLoader().getResource(path);
+        }
+        File sourcesDir = new File(url.toURI());
+        return sourcesDir.listFiles(YANG_FILE_FILTER);
+    }
+
     public static String getNamespace(String moduleName) {
         return schemaContext.findModules(moduleName).iterator().next().getNamespace().toString();
     }
 
-    public static Module findModule(String moduleName){
+    public static Module findModule(String moduleName) {
         return schemaContext.findModules(moduleName).iterator().next();
     }
 }

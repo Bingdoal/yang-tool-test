@@ -33,9 +33,8 @@ import java.util.Set;
 public class Application {
 
 
-    public static void main(String[] args) throws IOException, YangSyntaxErrorException, ReactorException, URISyntaxException {
-        YangUtils.schemaContext = YangUtils.getSchemaContext("/oran");
-        YangParserUtils.yangToJsonFile("/oran");
+    public static void main(String[] args) throws IOException, YangSyntaxErrorException, ReactorException, URISyntaxException, ClassNotFoundException {
+        YangParserUtils.yangToJsonFile();
 
 //        test();
     }

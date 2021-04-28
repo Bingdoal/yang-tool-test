@@ -22,11 +22,11 @@ import java.nio.file.Paths;
 import java.util.Collection;
 
 public class YangParserUtils {
-    public static void yangToJsonFile(String path) throws ReactorException, YangSyntaxErrorException, IOException, URISyntaxException {
+    public static void yangToJsonFile() throws ReactorException, YangSyntaxErrorException, IOException, URISyntaxException, ClassNotFoundException {
         clear();
         initDirectory();
 
-        EffectiveSchemaContext schemaContext = YangUtils.getSchemaContext(path);
+        EffectiveSchemaContext schemaContext = YangUtils.getSchemaContext();
         YangToJson yangToJson = new YangToJson();
         yangToJson.convertToDto(schemaContext);
     }

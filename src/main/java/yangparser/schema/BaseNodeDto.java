@@ -1,6 +1,7 @@
 package yangparser.schema;
 
 import lombok.Data;
+import org.opendaylight.yangtools.yang.model.api.Status;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,7 @@ public class BaseNodeDto {
     protected Optional<List<String>> ifFeature;
     protected boolean isArray = false;
     protected boolean config = true;
-    protected String xpath;
+    protected Status status;
+    //    protected String xpath;
     protected Optional<String> description;
 }
