@@ -13,8 +13,8 @@ public class ModuleDto {
     private String namespace;
     private String revision;
     private Optional<String> description;
-    private Optional<DataTreeDto> dataTree;
-    private Optional<Map<String, RpcDto>> rpc;
+    private DataTreeDto dataTree;
+    private Map<String, RpcDto> rpc;
     @JsonIgnoreProperties({"config", "xpath"})
     private Map<String, ContainerDto> notification;
 

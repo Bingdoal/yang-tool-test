@@ -81,12 +81,12 @@ public class YangToJson {
 
         DataTreeDto dataTreeDto = getDataTree(module.getChildNodes(), true);
         if (!dataTreeDto.isEmpty()) {
-            moduleDto.setDataTree(Optional.of(dataTreeDto));
+            moduleDto.setDataTree(dataTreeDto);
         }
 
         Map<String, RpcDto> rpcTree = getRpcTree(module.getRpcs());
         if (!rpcTree.isEmpty()) {
-            moduleDto.setRpc(Optional.of(rpcTree));
+            moduleDto.setRpc(rpcTree);
         }
 
         Map<String, ContainerDto> notificationTree = getNotificationTree(module.getNotifications());
@@ -245,28 +245,39 @@ public class YangToJson {
     }
 
     private String getXpath(DataSchemaNode childNode) {
+        if (childNode instanceof ChoiceSchemaNode) {
+            return null;
+        }
         String path = "";
         List<QName> pathName = new ArrayList<>();
         for (QName qName : childNode.getPath().getPathFromRoot()) {
+            String lastPath = path;
             pathName.add(qName);
             if (!qName.getNamespace().equals(module.getNamespace())) {
                 path += "/" + schemaContext.findModules(qName.getNamespace()).iterator().next().getName() + ":"
-                        + qName.getLocalName() + "/";
+                        + qName.getLocalName();
             } else {
                 path += "/" + module.getName() + ":" + qName.getLocalName();
             }
-            Optional<DataSchemaNode> dataSchemaNodeOptional = module.findDataTreeChild(pathName);
-            if (dataSchemaNodeOptional.isPresent()) {
-                DataSchemaNode dataSchemaNode = dataSchemaNodeOptional.get();
-                if (dataSchemaNode instanceof ListSchemaNode) {
-                    ListSchemaNode listSchemaNode = (ListSchemaNode) dataSchemaNode;
-                    if (listSchemaNode.getKeyDefinition().size() > 0) {
-                        path += "[" + listSchemaNode.getKeyDefinition().get(0).getLocalName() + "]";
+
+            try {
+                Optional<DataSchemaNode> dataSchemaNodeOptional = module.findDataTreeChild(pathName);
+                if (dataSchemaNodeOptional.isPresent()) {
+                    DataSchemaNode dataSchemaNode = dataSchemaNodeOptional.get();
+                    if (dataSchemaNode instanceof ListSchemaNode) {
+                        ListSchemaNode listSchemaNode = (ListSchemaNode) dataSchemaNode;
+                        if (listSchemaNode.getKeyDefinition().size() > 0) {
+                            path += "[" + listSchemaNode.getKeyDefinition().get(0).getLocalName() + "]";
+                        }
                     }
+                } else {
+                    throw new Exception();
                 }
-            } else {
-                return null;
+            } catch (Exception ex) {
+                path = lastPath;
+                pathName.remove(pathName.size() - 1);
             }
+
         }
         return path;
     }
@@ -283,6 +294,7 @@ public class YangToJson {
         LeafDto leafDto = new LeafDto();
         leafDto.setConfig(defaultConfig);
         leafDto.setXpath(getXpath(childNode));
+
         if (childNode.getDescription().isPresent()) {
             leafDto.setDescription(childNode.getDescription());
         }
@@ -300,6 +312,9 @@ public class YangToJson {
             TypeProperty type = getTypeInfo(childNode, typedData.getType());
             leafDto.setType(type.getName());
             leafDto.setTypeProperty(type);
+            if (type.getLeafref() != null && type.getLeafref().isPresent()) {
+                leafDto.setMandatory(true);
+            }
         }
 
         List<String> mustList = getMustConditions(childNode);
@@ -478,8 +493,8 @@ public class YangToJson {
                 }
             }
             if (baseLength != null) {
-                String lengthRange = baseLength.lowerEndpoint() + "~" + baseLength.upperEndpoint();
-                typeProperty.setLength(Optional.of(lengthRange));
+                typeProperty.setMin(Optional.of(baseLength.lowerEndpoint().toString()));
+                typeProperty.setMax(Optional.of(baseLength.upperEndpoint().toString()));
             }
         }
 

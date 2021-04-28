@@ -1,6 +1,7 @@
 package helper;
 
 import org.opendaylight.yangtools.yang.common.YangConstants;
+import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
 import org.opendaylight.yangtools.yang.model.repo.api.StatementParserMode;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
@@ -38,11 +39,17 @@ public class YangUtils {
         final CrossSourceStatementReactor.BuildAction reactor =
                 RFC7950Reactors.defaultReactor().newBuild(StatementParserMode.DEFAULT_MODE)
                         .addSources(sources);
+        EffectiveSchemaContext schemaContext = reactor.buildEffective();
 
-        return reactor.buildEffective();
+
+        return schemaContext;
     }
 
     public static String getNamespace(String moduleName) {
         return schemaContext.findModules(moduleName).iterator().next().getNamespace().toString();
+    }
+
+    public static Module findModule(String moduleName){
+        return schemaContext.findModules(moduleName).iterator().next();
     }
 }
