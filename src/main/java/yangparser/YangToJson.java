@@ -13,7 +13,6 @@ import org.opendaylight.yangtools.yang.model.api.meta.EffectiveStatement;
 import org.opendaylight.yangtools.yang.model.api.stmt.IfFeatureAwareDeclaredStatement;
 import org.opendaylight.yangtools.yang.model.api.stmt.IfFeatureStatement;
 import org.opendaylight.yangtools.yang.model.api.type.*;
-import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.opendaylight.yangtools.yang.parser.stmt.reactor.EffectiveSchemaContext;
 import yangparser.schema.*;
 import yangparser.schema.type.BitsType;
@@ -239,44 +238,6 @@ public class YangToJson {
             containerDto.setList(dataTreeDto.getList());
         }
         return containerDto;
-    }
-
-    private String getXpath(DataSchemaNode childNode) {
-        if (childNode instanceof ChoiceSchemaNode) {
-            return null;
-        }
-        String path = "";
-        List<QName> pathName = new ArrayList<>();
-        for (QName qName : childNode.getPath().getPathFromRoot()) {
-            String lastPath = path;
-            pathName.add(qName);
-            if (!qName.getNamespace().equals(module.getNamespace())) {
-                path += "/" + schemaContext.findModules(qName.getNamespace()).iterator().next().getName() + ":"
-                        + qName.getLocalName();
-            } else {
-                path += "/" + module.getName() + ":" + qName.getLocalName();
-            }
-
-            try {
-                Optional<DataSchemaNode> dataSchemaNodeOptional = module.findDataTreeChild(pathName);
-                if (dataSchemaNodeOptional.isPresent()) {
-                    DataSchemaNode dataSchemaNode = dataSchemaNodeOptional.get();
-                    if (dataSchemaNode instanceof ListSchemaNode) {
-                        ListSchemaNode listSchemaNode = (ListSchemaNode) dataSchemaNode;
-                        if (listSchemaNode.getKeyDefinition().size() > 0) {
-                            path += "[" + listSchemaNode.getKeyDefinition().get(0).getLocalName() + "]";
-                        }
-                    }
-                } else {
-                    throw new Exception();
-                }
-            } catch (Exception ex) {
-                path = lastPath;
-                pathName.remove(pathName.size() - 1);
-            }
-
-        }
-        return path;
     }
 
     private boolean isLeafLikeNode(DataSchemaNode node) {
@@ -513,11 +474,14 @@ public class YangToJson {
 
         } else if (nodeType instanceof LeafrefTypeDefinition) {
             LeafrefTypeDefinition leafrefType = (LeafrefTypeDefinition) nodeType;
-            TypeDefinition refType = SchemaContextUtil.getBaseTypeForLeafRef(leafrefType, schemaContext, dataSchemaNode);
+            TypeDefinition refType = MySchemaContextUtils.getBaseTypeForLeafRef(leafrefType, schemaContext, dataSchemaNode);
             typeProperty = getTypeInfo(dataSchemaNode, refType);
 
             typeProperty.setRequireInstance(Optional.of(leafrefType.requireInstance()));
-            typeProperty.setLeafref(Optional.of(leafrefType.getPathStatement().getOriginalString()));
+            DataSchemaNode leafrefNode = MySchemaContextUtils.getSchemaNodeForLeafRef(leafrefType, schemaContext, dataSchemaNode);
+            String leafrefXpath = MySchemaContextUtils.getXpathFromSchemaNode(schemaContext, leafrefNode);
+            typeProperty.setLeafref(Optional.of(leafrefXpath));
+            typeProperty.setLeafrefOrigin(Optional.of(leafrefType.getPathStatement().getOriginalString()));
         } else if (nodeType instanceof DecimalTypeDefinition) {
             DecimalTypeDefinition decimalType = (DecimalTypeDefinition) nodeType;
             typeProperty.setFractionDigits(Optional.of(decimalType.getFractionDigits()));

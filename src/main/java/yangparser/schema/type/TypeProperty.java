@@ -25,6 +25,7 @@ public class TypeProperty {
 
     private Optional<List<BitsType>> bits; // type bits
     private Optional<String> leafref; // type leafref
+    private Optional<String> leafrefOrigin; // type leafref
     private Optional<Boolean> requireInstance; // type leafref, instance-identity
 
     private Optional<String> min; // type int, decimal, string, binary
