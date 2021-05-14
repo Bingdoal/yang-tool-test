@@ -14,6 +14,7 @@ public class BaseNodeDto {
     protected boolean isArray = false;
     protected boolean config = true;
     protected Status status;
+    protected String xpath;
     //    protected String xpath;
     protected Optional<String> description;
 }

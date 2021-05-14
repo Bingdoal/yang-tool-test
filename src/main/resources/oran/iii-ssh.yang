@@ -1,0 +1,80 @@
+module iii-ssh {
+    namespace "urn:iii:ssh";
+    prefix iiissh;
+
+    revision 2021-03-23 {
+        description "Initial revision.";
+    }
+
+    container iii-ssh-result {
+        description "the result of ssh command";
+		config false;
+		
+		leaf result {
+			type string;
+			description "result of the iii-ssh-exec";
+		}
+		
+		leaf status {
+		  type enumeration {
+			enum INIT {
+				description "";}
+			enum PROCESSING {
+				description "";}
+			enum FINISH {
+				description "";}
+			}			
+			description "the status of ssh command, =0 initial, =1 still processing, =2 idle or finish";
+		}		
+    }
+
+    rpc iii-ssh-exec {
+        description "Operation to order the oven to put the prepared food inside.";
+
+        input {
+            leaf command {
+				type string;
+				description "the command exec in the device side.";
+            }
+        }
+		
+		output {
+			leaf status {
+			  type enumeration {
+				enum SUCCESS {
+					description "";}
+				enum FAILURE {
+					description "";}
+				}
+				description "Operation status";
+			}
+
+			leaf reject-reason {
+			  when "../status = 'FAILURE'";
+			  type string;
+			  description "";
+			}
+		}
+    }
+
+
+    notification cmd-finish {
+        description "";
+			
+		leaf status {
+			type enumeration {
+				enum SUCCESS {
+					description "";}
+				enum FAILURE {
+					description "";}
+			}
+			description "Operation status";
+		}
+
+		leaf reject-reason {
+			when "../status = 'FAILURE'";
+			type string;
+			description "";
+		}	
+    }
+}

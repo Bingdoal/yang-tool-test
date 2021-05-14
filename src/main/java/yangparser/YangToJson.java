@@ -14,6 +14,7 @@ import org.opendaylight.yangtools.yang.model.api.stmt.IfFeatureAwareDeclaredStat
 import org.opendaylight.yangtools.yang.model.api.stmt.IfFeatureStatement;
 import org.opendaylight.yangtools.yang.model.api.type.*;
 import org.opendaylight.yangtools.yang.parser.stmt.reactor.EffectiveSchemaContext;
+import org.opendaylight.yangtools.yang.xpath.api.YangXPathExpression;
 import yangparser.schema.*;
 import yangparser.schema.type.BitsType;
 import yangparser.schema.type.EnumType;
@@ -143,10 +144,6 @@ public class YangToJson {
         Map<String, LeafDto> leafList = new HashMap<>();
         Map<String, ContainerDto> containerList = new HashMap<>();
         for (DataSchemaNode node : childNodes) {
-//            if (node.getStatus() == Status.DEPRECATED) {
-//                continue;
-//            }
-
             String nodeName = node.getQName().getLocalName();
             if (node.isAugmenting()) {
                 String moduleName = schemaContext.findModules(node.getQName().getNamespace())
@@ -219,8 +216,7 @@ public class YangToJson {
                     containerDto.setKey(Optional.of(listSchemaNode.getKeyDefinition().get(0).getLocalName()));
                 }
             }
-
-//            containerDto.setXpath(getXpath(childNode));
+            containerDto.setXpath(MySchemaContextUtils.getXpathFromSchemaNode(schemaContext, childNode));
         }
 
         DataTreeDto dataTreeDto = getDataTree(dataNodeContainer.getChildNodes());
@@ -252,7 +248,7 @@ public class YangToJson {
         LeafDto leafDto = new LeafDto();
         leafDto.setStatus(childNode.getStatus());
         leafDto.setConfig(childNode.isConfiguration());
-//        leafDto.setXpath(getXpath(childNode));
+        leafDto.setXpath(MySchemaContextUtils.getXpathFromSchemaNode(schemaContext, childNode));
 
         if (childNode.getDescription().isPresent()) {
             leafDto.setDescription(childNode.getDescription());
@@ -502,6 +498,7 @@ public class YangToJson {
                 bitT.setName(bit.getName());
                 bitT.setPosition(Integer.parseInt(bit.getPosition().toString()));
                 bitT.setDescription(bit.getDescription());
+                bitsTypes.add(bitT);
             }
             typeProperty.setBits(Optional.of(bitsTypes));
 
