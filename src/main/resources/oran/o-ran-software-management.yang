@@ -531,7 +531,7 @@ module o-ran-software-management {
 
   // top level container
 
-  container software-inventory {
+  container software-inventory {  
     config false;
     description
       "Contains information about each software slot and its content.";
