@@ -29,6 +29,7 @@ public class YangUtils {
 
         List<File> files = new ArrayList<>(Arrays.asList(getYangFiles("/oran")));
         files.addAll(Arrays.asList(getYangFiles("/basic")));
+
         Collection<YangStatementStreamSource> sources = new ArrayList<>(files.size());
         for (File file : files) {
             sources.add(YangStatementStreamSource.create(YangTextSchemaSource.forFile(file)));
