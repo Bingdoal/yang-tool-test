@@ -1,9 +1,9 @@
-package yangparser;
+package yang.testtools.yangparser;
 
-import helper.YangUtils;
 import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
 import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.parser.stmt.reactor.EffectiveSchemaContext;
+import yang.testtools.helper.YangUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,11 +12,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class YangParserUtils {
-    public static void yangToJsonFile() throws ReactorException, YangSyntaxErrorException, IOException, URISyntaxException, ClassNotFoundException {
+    public static void yangToJsonFile(String... paths) throws ReactorException, YangSyntaxErrorException, IOException, URISyntaxException, ClassNotFoundException {
         clear();
         initDirectory();
 
-        EffectiveSchemaContext schemaContext = YangUtils.getSchemaContext();
+        EffectiveSchemaContext schemaContext = YangUtils.getSchemaContext(paths);
         YangToJson yangToJson = new YangToJson();
         yangToJson.convertToDto(schemaContext);
     }

@@ -1,4 +1,4 @@
-package yangparser.schema;
+package yang.testtools.yangparser.schema;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

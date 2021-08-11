@@ -1,4 +1,4 @@
-package yangparser.schema;
+package yang.testtools.yangparser.schema;
 
 import lombok.Data;
 import org.opendaylight.yangtools.yang.model.api.Status;

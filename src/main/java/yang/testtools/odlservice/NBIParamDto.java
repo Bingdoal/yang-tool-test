@@ -1,4 +1,4 @@
-package odlservice;
+package yang.testtools.odlservice;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package helper;
+package yang.testtools.helper;
 
 import org.opendaylight.yangtools.yang.common.YangConstants;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -10,13 +10,15 @@ import org.opendaylight.yangtools.yang.parser.rfc7950.repo.YangStatementStreamSo
 import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
 import org.opendaylight.yangtools.yang.parser.stmt.reactor.EffectiveSchemaContext;
-import yangparser.YangToJson;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,10 +27,16 @@ import java.util.List;
 public class YangUtils {
     public static EffectiveSchemaContext schemaContext;
 
-    public static EffectiveSchemaContext getSchemaContext() throws ReactorException, YangSyntaxErrorException, IOException, URISyntaxException, ClassNotFoundException {
+    public static EffectiveSchemaContext getSchemaContext(String... paths) throws ReactorException, YangSyntaxErrorException, IOException, URISyntaxException, ClassNotFoundException {
 
-        List<File> files = new ArrayList<>(Arrays.asList(getYangFiles("/oran")));
-        files.addAll(Arrays.asList(getYangFiles("/basic")));
+        List<File> files = new ArrayList<>();
+        for (String path : paths) {
+            File[] folderFiles = getYangFiles(path);
+            if (folderFiles == null) {
+                System.out.println("If use window, the path is must under System Disk.");
+            }
+            files.addAll(Arrays.asList(folderFiles));
+        }
 
         Collection<YangStatementStreamSource> sources = new ArrayList<>(files.size());
         for (File file : files) {
@@ -43,14 +51,10 @@ public class YangUtils {
         return schemaContext;
     }
 
-    private static File[] getYangFiles(String path) throws URISyntaxException, ClassNotFoundException {
+    private static File[] getYangFiles(String path) throws IOException {
         FileFilter YANG_FILE_FILTER =
                 file -> file.getName().endsWith(YangConstants.RFC6020_YANG_FILE_EXTENSION) && file.isFile();
-        URL url = YangUtils.class.getResource(path);
-        if (url == null) {
-            url = YangUtils.class.getClassLoader().getResource(path);
-        }
-        File sourcesDir = new File(url.toURI());
+        File sourcesDir = new File(path);
         return sourcesDir.listFiles(YANG_FILE_FILTER);
     }
 

@@ -1,8 +1,8 @@
-package odlservice;
+package yang.testtools.odlservice;
 
-import helper.YangUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import yang.testtools.helper.YangUtils;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -13,7 +13,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
-import java.util.Arrays;
 
 public class FilterParser {
 

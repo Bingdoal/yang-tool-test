@@ -374,7 +374,7 @@ typedef domain-name {
   reference
    "RFC  952: DoD Internet Host Table Specification
     RFC 1034: Domain Names - Concepts and Facilities
-    RFC 1123: Requirements for Internet Hosts -- Application
+    RFC 1123: Requirements for Internet Hosts -- yang.testtools.YangTestToolsMain
               and Support
     RFC 2782: A DNS RR for specifying the location of services
               (DNS SRV)

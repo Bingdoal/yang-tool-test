@@ -1,4 +1,4 @@
-package yangparser;
+package yang.testtools.yangparser;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,12 +14,11 @@ import org.opendaylight.yangtools.yang.model.api.stmt.IfFeatureAwareDeclaredStat
 import org.opendaylight.yangtools.yang.model.api.stmt.IfFeatureStatement;
 import org.opendaylight.yangtools.yang.model.api.type.*;
 import org.opendaylight.yangtools.yang.parser.stmt.reactor.EffectiveSchemaContext;
-import org.opendaylight.yangtools.yang.xpath.api.YangXPathExpression;
-import yangparser.schema.*;
-import yangparser.schema.type.BitsType;
-import yangparser.schema.type.EnumType;
-import yangparser.schema.type.IdentityType;
-import yangparser.schema.type.TypeProperty;
+import yang.testtools.yangparser.schema.*;
+import yang.testtools.yangparser.schema.type.BitsType;
+import yang.testtools.yangparser.schema.type.EnumType;
+import yang.testtools.yangparser.schema.type.IdentityType;
+import yang.testtools.yangparser.schema.type.TypeProperty;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

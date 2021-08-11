@@ -1,4 +1,4 @@
-package yangparser.schema.type;
+package yang.testtools.yangparser.schema.type;
 
 import lombok.Data;
 

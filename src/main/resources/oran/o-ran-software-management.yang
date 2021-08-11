@@ -427,7 +427,7 @@ module o-ran-software-management {
           description "source not available.";
         }
         enum APPLICATION_ERROR {
-          description "Application related errors";
+          description "yang.testtools.YangTestToolsMain related errors";
         }
         enum TIMEOUT {
           description "Timeout waiting for download";

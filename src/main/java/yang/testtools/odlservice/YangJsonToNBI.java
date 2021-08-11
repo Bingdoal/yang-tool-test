@@ -1,9 +1,9 @@
-package odlservice;
+package yang.testtools.odlservice;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import helper.YangUtils;
+import yang.testtools.helper.YangUtils;
 
 public class YangJsonToNBI {
     private String protocol = "http://";

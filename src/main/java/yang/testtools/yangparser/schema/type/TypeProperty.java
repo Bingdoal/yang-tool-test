@@ -1,7 +1,7 @@
-package yangparser.schema.type;
+package yang.testtools.yangparser.schema.type;
 
 import lombok.Data;
-import yangparser.schema.DataTreeDto;
+import yang.testtools.yangparser.schema.DataTreeDto;
 
 import java.util.List;
 import java.util.Map;
