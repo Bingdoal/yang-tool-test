@@ -9,11 +9,11 @@ import java.net.URISyntaxException;
 
 public class YangTestToolsMain {
     public static void main(String[] args) throws IOException, YangSyntaxErrorException, ReactorException, URISyntaxException, ClassNotFoundException {
-        if (args == null || args.length <= 0) {
-            System.out.println("Need input yang directory path.");
-            return;
-        }
-        YangParserUtils.yangToJsonFile(args);
-//        YangParserUtils.yangToJsonFile("C:\\新增資料夾");
+//        if (args == null || args.length <= 0) {
+//            System.out.println("Need input yang directory path.");
+//            return;
+//        }
+//        YangParserUtils.yangToJsonFile(args);
+        YangParserUtils.yangToJsonFile("C:\\affirmed\\nssf");
     }
 }
